@@ -6,7 +6,7 @@ using UnityEngine;
 public class NewBehaviourScript : MonoBehaviour
 {
     Lsystem lsystem;
-    List<Vector3> points = new List<Vector3>();
+    List<Branche> points = new List<Branche>();
     
 
     // Start is called before the first frame update
@@ -16,8 +16,9 @@ public class NewBehaviourScript : MonoBehaviour
         Dictionary<char, string> rules = new Dictionary<char, string>();
         rules.Add('A', "B[-A][+A]B");
         rules.Add('B', "BB");
-        lsystem = new Lsystem("A", rules);
-        lsystem.Generate(2);
+        string[] variables = {"A", "B"};
+        string[] constantes = {"+", "-", "[", "]"};
+        lsystem = new Lsystem(new List<string>(variables), new List<string>(constantes), "A", rules);
         lsystem.Generate(2);
         GetPoints(lsystem.current);
         PlacePoints();
@@ -36,20 +37,29 @@ public class NewBehaviourScript : MonoBehaviour
     {
         Vector3 pos = Vector3.zero;
         Vector3 dir = Vector3.up;
-        float angle = 25f;
+        float angle = 59f;
         float length = 1f;
 
         Stack<Vector3> posStack = new Stack<Vector3>();
         Stack<Vector3> dirStack = new Stack<Vector3>();
-        points.Add(pos);
+        Stack<Branche> racineStack = new Stack<Branche>();
 
-        for (int i = 1; i < current.Length; i++)
+        Branche racine = new Branche(0, pos);
+        points.Add(racine);
+        racineStack.Push(racine);
+    
+         // BB[-B[-A][+A]B][+B[-A][+A]B]BB
+
+        for (int i = 1, cpt = 0; i < current.Length; i++)
         {
             char c = current[i];
-            if (c == 'A' || c == 'B')
+            if (lsystem.variables.Contains(c.ToString()))
             {
                 Vector3 next = pos + dir * length;
-                points.Add(next);
+                Branche branche = new Branche(++cpt, next);
+                racine.addChild(branche);
+                points.Add(branche);
+                racine = branche;
                 pos = next;
             }
             else if (c == '+')
@@ -64,11 +74,13 @@ public class NewBehaviourScript : MonoBehaviour
             {
                 posStack.Push(pos);
                 dirStack.Push(dir);
+                racineStack.Push(racine);
             }
             else if (c == ']')
             {
                 dir = dirStack.Pop();
                 pos = posStack.Pop();
+                racine = racineStack.Pop();
             }
         }
     }
@@ -85,10 +97,29 @@ public class NewBehaviourScript : MonoBehaviour
     {
         for (int i = 0; i < points.Count; i += 1)
         {
-            Vector3 start = points[i];
+            Branche branche = points[i];
+            Vector3 start = branche.getPosition();
+            foreach(var fils in branche.getChildren())
+            {
+                Vector3 end = fils.getPosition();
+                GameObject line = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                line.transform.position = (start + end) / 2;
+                //line.transform.rotation = Quaternion.LookRotation(end - start);
+                line.transform.localScale = new Vector3(0.1f, 0.1f, Vector3.Distance(start, end));
+                line.transform.LookAt(end);
+            }
+        }
+    }
+
+    public void PlaceEdges()
+    {
+        for (int i = 0; i < points.Count; i += 1)
+        {
+            Vector3 start = points[i].getPosition();
             GameObject line = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             line.transform.position = start;
             line.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
+            Debug.Log("point " + points[i].getId() + points[i].getChildren());
         }
     }
 }
