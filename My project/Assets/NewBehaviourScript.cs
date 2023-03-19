@@ -6,6 +6,10 @@ using UnityEngine;
 public class NewBehaviourScript : MonoBehaviour
 {
     Lsystem lsystem;
+    public float lower_angle = 25f;
+    public float upper_angle = 45f;
+    public float length = 1f;
+    public float branch_chance = 0.8f;
     List<Branche> points = new List<Branche>();
     
 
@@ -37,8 +41,6 @@ public class NewBehaviourScript : MonoBehaviour
     {
         Vector3 pos = Vector3.zero;
         Vector3 dir = Vector3.up;
-        float angle = 59f;
-        float length = 1f;
 
         Stack<Vector3> posStack = new Stack<Vector3>();
         Stack<Vector3> dirStack = new Stack<Vector3>();
@@ -55,7 +57,7 @@ public class NewBehaviourScript : MonoBehaviour
             char c = current[i];
             if (lsystem.variables.Contains(c.ToString()))
             {
-                Vector3 next = pos + dir * length;
+                Vector3 next = pos + dir * this.length;
                 Branche branche = new Branche(++cpt, next);
                 racine.addChild(branche);
                 points.Add(branche);
@@ -64,14 +66,27 @@ public class NewBehaviourScript : MonoBehaviour
             }
             else if (c == '+')
             {
+                float angle = UnityEngine.Random.Range(lower_angle, upper_angle);
                 dir = Quaternion.AngleAxis(angle, Vector3.forward) * dir;
             }
             else if (c == '-')
             {
+                float angle = UnityEngine.Random.Range(lower_angle, upper_angle);
                 dir = Quaternion.AngleAxis(-angle, Vector3.forward) * dir;
             }
             else if (c == '[')
             {
+                // chance of skipping a branch
+                if (UnityEngine.Random.value >= this.branch_chance)
+                {
+                    int j = findClosingBracket(current, i);
+                    if (j == -1)
+                    {
+                        break;
+                    }
+                    i = j;
+                    continue;
+                }
                 posStack.Push(pos);
                 dirStack.Push(dir);
                 racineStack.Push(racine);
@@ -103,6 +118,7 @@ public class NewBehaviourScript : MonoBehaviour
             {
                 Vector3 end = fils.getPosition();
                 GameObject line = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                line.transform.parent = this.gameObject.transform;
                 line.transform.position = (start + end) / 2;
                 //line.transform.rotation = Quaternion.LookRotation(end - start);
                 line.transform.localScale = new Vector3(0.1f, 0.1f, Vector3.Distance(start, end));
@@ -121,5 +137,26 @@ public class NewBehaviourScript : MonoBehaviour
             line.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
             Debug.Log("point " + points[i].getId() + points[i].getChildren());
         }
+    }
+
+    private int findClosingBracket(string s, int i)
+    {
+        int cpt = 0;
+        for (int j = i; j < s.Length; j++)
+        {
+            if (s[j] == '[')
+            {
+                cpt++;
+            }
+            else if (s[j] == ']')
+            {
+                cpt--;
+            }
+            if (cpt == 0)
+            {
+                return j;
+            }
+        }
+        return -1;
     }
 }
