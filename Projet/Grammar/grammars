@@ -1,0 +1,57 @@
+--------First Coral---------------------------------
+variables : A, B
+constants : +, -, [, ]
+start : A
+
+rules :
+A -> B[-A][+A]B
+B -> BB
+
+angle : 22.5
+
+Assets/Grammar/First_coral.lsys
+
+--------Brain Coral---------------------------------
+variables : A, B, C
+constants : +, -, [, ]
+start : A
+
+rules :
+A -> B[-A]C[+A]B
+B -> BB
+C -> C
+
+angle : 22.5
+
+
+Assets/Grammar/Brain_Coral.lsys
+
+--------Staghorn Coral---------------------------------
+variables : A, B, C, D
+constants : +, -, [, ]
+start : A
+
+rules :
+A -> B[-A][+A]C
+B -> D[+B]D[-B]D
+C -> CC
+D -> D
+
+angle : 25
+
+
+Assets/Grammar/Staghorn_Coral.lsys
+
+---------Tube Coral--------------------------------
+variables : A, B
+constants : +, -, [, ]
+start : A
+
+rules :
+A -> B[-A][+A]
+B -> BB
+
+angle : 30
+
+
+Assets/Grammar/Tube_Coral.lsys
