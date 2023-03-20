@@ -32,15 +32,24 @@ class LsystemInterpretor
         float angle = parseAngle(lines[3]);
 
         // Parse the production rules
-        Dictionary<char, string> rules = new Dictionary<char, string>();
+        Dictionary<char, List<Rule>> rules = new Dictionary<char, List<Rule>>();
         for (int i = 4; i < lines.Length; i++)
         {
             string[] rule = lines[i].Split(new char[] { ' ', '=' }, StringSplitOptions.RemoveEmptyEntries);
             if (rule.Length != 0)
             {
                 char variable = rule[0][0];
-                string production = rule[1];
-                rules[variable] = production;
+                rules[variable] = new List<Rule>();
+                if(rule.Length == 2)
+                {
+                    string production = rule[1];
+                    rules[variable].Add(new Rule(production));
+                }
+                else{
+                    string production = rule[2];
+                    float probability = float.Parse(rule[1].Trim(new char[] { '(', ')' }));
+                    rules[variable].Add(new Rule(production, probability));
+                }
             }
         }
 

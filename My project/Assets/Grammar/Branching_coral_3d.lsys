@@ -4,8 +4,11 @@ start : A
 angle : 22,5
 
 rules :
-A = BC
-B = [E&-A][&+A]CE
+A = [-&B][C][^+B]
+B (0,8) = [E&-A][&+A][^C]E
+B (0,2) = E&-[A][&+E]
 C = CE[-E+A]D
-D = EC
-E = BE
+D (0,33) = EC[A]
+D (0,33) = EC[&D]
+D (0,34) = E-[^^C]
+E = B-^^E

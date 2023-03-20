@@ -12,10 +12,10 @@ public class ScriptGen1 : MonoBehaviour
     LsystemInterpretor lSysInterp;
 
     GameObject parent;
-    public int nbIteration = 2;
+    public int nbIteration = 4;
     public float angle = 25f;
     public float noise = 5f;
-    public float length = 0.5f;
+    public float length = 1f;
     public string grammarFile = "Assets/Grammar/Branching_coral_3d";
     
     public float branch_chance = 0.8f;
@@ -34,7 +34,7 @@ public class ScriptGen1 : MonoBehaviour
 
         // lsystem = new Lsystem(new List<string>(variables), new List<string>(constantes), "A", rules);
 
-        lsystem = new Lsystem(new List<string>(), new List<string>(), "", new Dictionary<char, string>());
+        lsystem = new Lsystem(new List<string>(), new List<string>(), "", new Dictionary<char, List<Rule>>());
         LsystemInterpretor lSysInterp = new LsystemInterpretor(grammarFile, lsystem, nbIteration);
         
         lSysInterp.interpret();
@@ -72,7 +72,7 @@ public class ScriptGen1 : MonoBehaviour
 
     public void GetPoints(string current)
     {
-        Vector3 pos = Vector3.zero;
+        Vector3 pos = parent.transform.position;
         Vector3 dir = Vector3.up;
         float angle = lsystem.angle;
 

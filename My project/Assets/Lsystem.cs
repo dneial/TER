@@ -10,12 +10,12 @@ class Lsystem {
     public string current;
     public List<string> variables;
     public List<string> constantes;
-    public Dictionary<char, string> rules = new Dictionary<char, string>();
+    public Dictionary<char, List<Rule>> rules;
 
     public float angle;
 
     public Lsystem(List<string> variables, List<string> constantes, 
-                    string axiom, Dictionary<char, string> rules) {
+                    string axiom, Dictionary<char, List<Rule>> rules) {
 
         this.variables = variables;
         this.constantes = constantes;
@@ -35,7 +35,18 @@ class Lsystem {
                 char c = current[j];
                 if (rules.ContainsKey(c))
                 {
-                    next += rules[c];
+                    //choose a rule based on its probability
+                    float r = UnityEngine.Random.value;
+                    float sum = 0f;
+                    foreach (Rule rule in rules[c])
+                    {
+                        sum += rule.getProbability();
+                        if (r <= sum)
+                        {
+                            next += rule.getRule();
+                            break;
+                        }
+                    }
                 }
                 else
                 {
@@ -58,9 +69,12 @@ class Lsystem {
         str += "axiom = " + axiom + "\n";
         str += "angle = " + angle + "\n";
         str += "rules = \n";
-        foreach (KeyValuePair<char, string> rule in rules)
+        foreach (KeyValuePair<char, List<Rule>> rule in rules)
         {
-            str += rule.Key + " -> " + rule.Value + "\n";
+            foreach (Rule r in rule.Value)
+            {
+                str += rule.Key + " -> " + r.getRule() + " (" + r.getProbability() + ")\n";
+            }
         }
         str += "current = " + current + "\n";
 
