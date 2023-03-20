@@ -9,6 +9,7 @@ class Branche
     private long id;
     private Vector3 position;
     private List<Branche> children;
+    private GameObject gameobject;
 
     public Branche(long id, Vector3 position) {
         this.id = id;

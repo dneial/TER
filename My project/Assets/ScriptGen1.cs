@@ -15,7 +15,10 @@ public class ScriptGen1 : MonoBehaviour
     public int nbIteration = 2;
     public float angle = 25f;
     public float noise = 5f;
-    public string grammarFile = "Assets/Grammar/First_coral.lsys";
+    public float length = 0.5f;
+    public string grammarFile = "Assets/Grammar/Branching_coral_3d";
+    
+    public float branch_chance = 0.8f;
 
     // Start is called before the first frame update
     void Start()
@@ -54,12 +57,24 @@ public class ScriptGen1 : MonoBehaviour
 
     // }
 
+    //regles d'interprétation 3D :
+
+    // F : Se déplacer d’un pas unitaire (∈ V)
+    // + : Tourner à gauche d’angle α (∈ S)
+    // - : Tourner à droite d’un angle α (∈ S)
+    // & : Pivoter vers le bas d’un angle α (∈ S)
+    // ^ : Pivoter vers le haut d’un angle α (∈ S)
+    // < : Roulez vers la gauche d’un angle α (∈ S)
+    // > : Roulez vers la droite d’un angle α (∈ S)
+    // | : Tourner sur soi-même de 180° (∈ S)
+    // [ : Sauvegarder la position courante (∈ S)
+    // ] : Restaurer la dernière position sauvée (∈ S)
+
     public void GetPoints(string current)
     {
         Vector3 pos = Vector3.zero;
         Vector3 dir = Vector3.up;
         float angle = lsystem.angle;
-        float length = 1f;
 
         Stack<Vector3> posStack = new Stack<Vector3>();
         Stack<Vector3> dirStack = new Stack<Vector3>();
@@ -68,10 +83,8 @@ public class ScriptGen1 : MonoBehaviour
         Branche racine = new Branche(0, pos);
         points.Add(racine);
         racineStack.Push(racine);
-    
-         // BB[-B[-A][+A]B][+B[-A][+A]B]BB
 
-        for (int i = 1, cpt = 0; i < current.Length; i++)
+        for (int i = 0, cpt = 0; i < current.Length; i++)
         {
             char c = current[i];
             if (lsystem.variables.Contains(c.ToString()))
@@ -85,14 +98,45 @@ public class ScriptGen1 : MonoBehaviour
             }
             else if (c == '+')
             {
-                dir = Quaternion.AngleAxis(addNoise(angle, noise), Vector3.forward) * dir;
+                dir = Quaternion.AngleAxis(angle, Vector3.forward) * dir;
             }
             else if (c == '-')
             {
-                dir = Quaternion.AngleAxis(-addNoise(angle, noise), Vector3.forward) * dir;
+                dir = Quaternion.AngleAxis(-angle, Vector3.forward) * dir;
+            }
+            else if (c == '&')
+            {
+                dir = Quaternion.AngleAxis(angle, Vector3.right) * dir;
+            }
+            else if (c == '^')
+            {
+                dir = Quaternion.AngleAxis(-angle, Vector3.right) * dir;
+            }
+            else if (c == '<')
+            {
+                dir = Quaternion.AngleAxis(angle, Vector3.up) * dir;
+            }
+            else if (c == '>')
+            {
+                dir = Quaternion.AngleAxis(-angle, Vector3.up) * dir;
+            }
+            else if (c == '|')
+            {
+                dir = Quaternion.AngleAxis(180, Vector3.up) * dir;
             }
             else if (c == '[')
             {
+                // chance of skipping a branch
+                if (UnityEngine.Random.value >= this.branch_chance)
+                {
+                    int j = findClosingBracket(current, i);
+                    if (j == -1)
+                    {
+                        break;
+                    }
+                    i = j;
+                    continue;
+                }
                 posStack.Push(pos);
                 dirStack.Push(dir);
                 racineStack.Push(racine);
@@ -155,6 +199,27 @@ public class ScriptGen1 : MonoBehaviour
     {
         float noise = UnityEngine.Random.Range(-noiseAmmount, noiseAmmount);
         return angle + noise;
+    }
+
+    private int findClosingBracket(string s, int i)
+    {
+        int cpt = 0;
+        for (int j = i; j < s.Length; j++)
+        {
+            if (s[j] == '[')
+            {
+                cpt++;
+            }
+            else if (s[j] == ']')
+            {
+                cpt--;
+            }
+            if (cpt == 0)
+            {
+                return j;
+            }
+        }
+        return -1;
     }
     
 }

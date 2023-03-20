@@ -1,0 +1,11 @@
+variables : A, B, C, D, E
+constants : +, -, [, ], &, ^
+start : A
+angle : 22,5
+
+rules :
+A = BC
+B = [E&-A][&+A]CE
+C = CE[-E+A]D
+D = EC
+E = BE
