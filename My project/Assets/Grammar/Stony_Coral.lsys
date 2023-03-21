@@ -1,7 +1,7 @@
 variables : A, B, C, D
 constants : +, -, [, ]
 start : A
-angle : 22.5
+angle : 40
 rules :
 A = B+ACD++C-BD-
 B = BC-B+D

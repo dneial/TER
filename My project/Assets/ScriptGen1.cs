@@ -13,49 +13,55 @@ public class ScriptGen1 : MonoBehaviour
 
     GameObject parent;
     public int nbIteration = 4;
-    public float angle = 25f;
+    [Range(0, 180)]
+    public float angle;
+    [Range(0, 100)]
     public float noise = 5f;
-    public float length = 1f;
-    public string grammarFile = "Assets/Grammar/Branching_coral_3d";
-    
+    public float length = 0.75f;
+    [Range(0, 1)]
     public float branch_chance = 0.8f;
+    
+
+    public UnityEngine.Object grammarFile;
+
+
+    //Awake is called before Start
+    void Awake()
+    {
+        string grammar = Application.dataPath + "/Grammar/" + grammarFile.name+".lsys";
+
+        lsystem = new Lsystem(new List<string>(), new List<string>(), "", new Dictionary<char, List<Rule>>());
+        LsystemInterpretor lSysInterp = new LsystemInterpretor(grammar, lsystem, nbIteration);
+        
+        lSysInterp.interpret();
+        angle = lsystem.angle;
+        
+        lsystem.Generate(nbIteration);
+
+        Debug.Log(lsystem.ToString());
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-
-        parent = gameObject; 
-
-        // Dictionary<char, string> rules = new Dictionary<char, string>();
-        // rules.Add('A', "B[-A][+A]B");
-        // rules.Add('B', "BB");
-        // string[] variables = {"A", "B"};
-        // string[] constantes = {"+", "-", "[", "]"};
-
-        // lsystem = new Lsystem(new List<string>(variables), new List<string>(constantes), "A", rules);
-
-        lsystem = new Lsystem(new List<string>(), new List<string>(), "", new Dictionary<char, List<Rule>>());
-        LsystemInterpretor lSysInterp = new LsystemInterpretor(grammarFile, lsystem, nbIteration);
-        
-        lSysInterp.interpret();
-
-        lsystem.Generate(nbIteration);
-
-        Debug.Log(lsystem.ToString());
-
+        parent = gameObject;
 
         GetPoints(lsystem.current);
-        PlacePoints();
-
+        PlaceBranchesv2(points[0]);
+        
         Debug.Log(lsystem.current);
-
     }
 
-    // Update is called once per frame
-    // void Update()
-    // {
-
-    // }
+    //reset is called when the user hits the reset button in the inspector's context menu or when adding the component the first time
+    void Reset()
+    {
+        //reset the public variables to their original values
+        nbIteration = 4;
+        angle = 25f;
+        noise = 5f;
+        length = 0.75f;
+        branch_chance = 1f;
+    }
 
     //regles d'interprétation 3D :
 
@@ -74,7 +80,6 @@ public class ScriptGen1 : MonoBehaviour
     {
         Vector3 pos = parent.transform.position;
         Vector3 dir = Vector3.up;
-        float angle = lsystem.angle;
 
         Stack<Vector3> posStack = new Stack<Vector3>();
         Stack<Vector3> dirStack = new Stack<Vector3>();
@@ -89,36 +94,36 @@ public class ScriptGen1 : MonoBehaviour
             char c = current[i];
             if (lsystem.variables.Contains(c.ToString()))
             {
-                Vector3 next = pos + dir * length;
-                Branche branche = new Branche(++cpt, next);
+                Vector3 nextpos = pos + dir * length;
+                Branche branche = new Branche(++cpt, nextpos);
                 racine.addChild(branche);
                 points.Add(branche);
                 racine = branche;
-                pos = next;
+                pos = nextpos;
             }
             else if (c == '+')
             {
-                dir = Quaternion.AngleAxis(angle, Vector3.forward) * dir;
+                dir = Quaternion.AngleAxis(addNoise(angle, noise), Vector3.forward) * dir;
             }
             else if (c == '-')
             {
-                dir = Quaternion.AngleAxis(-angle, Vector3.forward) * dir;
+                dir = Quaternion.AngleAxis(-addNoise(angle, noise), Vector3.forward) * dir;
             }
             else if (c == '&')
             {
-                dir = Quaternion.AngleAxis(angle, Vector3.right) * dir;
+                dir = Quaternion.AngleAxis(addNoise(angle, noise), Vector3.right) * dir;
             }
             else if (c == '^')
             {
-                dir = Quaternion.AngleAxis(-angle, Vector3.right) * dir;
+                dir = Quaternion.AngleAxis(-addNoise(angle, noise), Vector3.right) * dir;
             }
             else if (c == '<')
             {
-                dir = Quaternion.AngleAxis(angle, Vector3.up) * dir;
+                dir = Quaternion.AngleAxis(addNoise(angle, noise), Vector3.up) * dir;
             }
             else if (c == '>')
             {
-                dir = Quaternion.AngleAxis(-angle, Vector3.up) * dir;
+                dir = Quaternion.AngleAxis(-addNoise(angle, noise), Vector3.up) * dir;
             }
             else if (c == '|')
             {
@@ -158,7 +163,7 @@ public class ScriptGen1 : MonoBehaviour
         }
     }
 
-    public void PlacePoints()
+    public void PlaceBranches()
     {
         for (int i = 0; i < points.Count; i += 1)
         {
@@ -168,7 +173,6 @@ public class ScriptGen1 : MonoBehaviour
             {
                 Vector3 end = fils.getPosition();
                 GameObject line = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
 
                 line.name = "edge (" + branche.getId() + " " + fils.getId() + ")";
                 line.transform.SetParent(parent.transform);
@@ -181,17 +185,27 @@ public class ScriptGen1 : MonoBehaviour
         }
     }
 
-    public void PlaceEdges()
+    //fonction récursive pour placer les branches
+    public void PlaceBranchesv2(Branche b)
     {
-        for (int i = 0; i < points.Count; i += 1)
+        Vector3 start = b.getPosition();
+        foreach (var fils in b.getChildren())
         {
-            Vector3 start = points[i].getPosition();
-            GameObject line = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            line.transform.position = start;
-            line.transform.localScale = new Vector3(0.1f, 0.1f, 0.1f);
-            Debug.Log("point " + points[i].getId() + points[i].getChildren());
+            Vector3 end = fils.getPosition();
+            fils.setGameObject(GameObject.CreatePrimitive(PrimitiveType.Cube));
+
+            fils.getGameObject().name = "edge (" + b.getId() + " " + fils.getId() + ")";
+            fils.getGameObject().transform.SetParent(parent.transform);
+
+            fils.getGameObject().transform.position = (start + end) / 2;
+            fils.getGameObject().transform.localScale = new Vector3(0.1f, 0.1f, Vector3.Distance(start, end));
+            fils.getGameObject().transform.LookAt(end);
+
+            PlaceBranchesv2(fils);
         }
     }
+   
+
 
 
     //add noise to the angle
