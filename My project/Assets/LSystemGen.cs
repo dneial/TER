@@ -9,15 +9,18 @@ public class ScriptGen1 : MonoBehaviour
 
     List<Branche> points = new List<Branche>();
 
-    LsystemInterpretor lSysInterp;
-
     GameObject parent;
+
     public int nbIteration = 4;
+
     [Range(0, 180)]
     public float angle;
+
     [Range(0, 100)]
     public float noise = 5f;
+
     public float length = 0.75f;
+
     [Range(0, 1)]
     public float branch_chance = 0.8f;
     
@@ -27,27 +30,21 @@ public class ScriptGen1 : MonoBehaviour
 
     //Awake is called before Start
     void Awake()
-    {
-        string grammar = Application.dataPath + "/Grammar/" + grammarFile.name+".lsys";
-
-        lsystem = new Lsystem(new List<string>(), new List<string>(), "", new Dictionary<char, List<Rule>>());
-        LsystemInterpretor lSysInterp = new LsystemInterpretor(grammar, lsystem, nbIteration);
-        
-        lSysInterp.interpret();
+    {   
+        string grammar = Application.dataPath + "/Grammar/" + grammarFile.name + ".lsys";
+        lsystem = LsystemInterpretor.ParseFile(grammar);
         angle = lsystem.angle;
-        
-        lsystem.Generate(nbIteration);
-
-        Debug.Log(lsystem.ToString());
     }
 
     // Start is called before the first frame update
     void Start()
     {
+        lsystem.Generate(nbIteration);
+
         parent = gameObject;
 
         GetPoints(lsystem.current);
-        PlaceBranchesv2(points[0]);
+        PlaceBranches(points[0]);
         
         Debug.Log(lsystem.current);
     }
@@ -163,30 +160,8 @@ public class ScriptGen1 : MonoBehaviour
         }
     }
 
-    public void PlaceBranches()
-    {
-        for (int i = 0; i < points.Count; i += 1)
-        {
-            Branche branche = points[i];
-            Vector3 start = branche.getPosition();
-            foreach(var fils in branche.getChildren())
-            {
-                Vector3 end = fils.getPosition();
-                GameObject line = GameObject.CreatePrimitive(PrimitiveType.Cube);
-
-                line.name = "edge (" + branche.getId() + " " + fils.getId() + ")";
-                line.transform.SetParent(parent.transform);
-
-                line.transform.position = (start + end) / 2;
-                line.transform.localScale = new Vector3(0.1f, 0.1f, Vector3.Distance(start, end));
-                line.transform.LookAt(end);
-
-            }
-        }
-    }
-
     //fonction récursive pour placer les branches
-    public void PlaceBranchesv2(Branche b)
+    private void PlaceBranches(Branche b)
     {
         Vector3 start = b.getPosition();
         foreach (var fils in b.getChildren())
@@ -201,15 +176,14 @@ public class ScriptGen1 : MonoBehaviour
             fils.getGameObject().transform.localScale = new Vector3(0.1f, 0.1f, Vector3.Distance(start, end));
             fils.getGameObject().transform.LookAt(end);
 
-            PlaceBranchesv2(fils);
+            PlaceBranches(fils);
         }
     }
-   
 
 
 
     //add noise to the angle
-    public float addNoise(float angle, float noiseAmmount)
+    private float addNoise(float angle, float noiseAmmount)
     {
         float noise = UnityEngine.Random.Range(-noiseAmmount, noiseAmmount);
         return angle + noise;

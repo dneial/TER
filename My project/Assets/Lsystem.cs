@@ -15,14 +15,14 @@ class Lsystem {
     public float angle;
 
     public Lsystem(List<string> variables, List<string> constantes, 
-                    string axiom, Dictionary<char, List<Rule>> rules) {
+                    string axiom, Dictionary<char, List<Rule>> rules, float angle = 1f) {
 
         this.variables = variables;
         this.constantes = constantes;
         this.axiom = axiom;
         this.current = axiom;
         this.rules = rules;
-        this.angle = 1f;
+        this.angle = angle;
     }
 
     public void Generate(int n = 1)

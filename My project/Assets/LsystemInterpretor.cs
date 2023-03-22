@@ -6,24 +6,8 @@ using UnityEngine;
 
 class LsystemInterpretor
 {
-    private Lsystem lsystem;
-    private int nbIteration;
-    private string grammarFilePath;
-
-
-    public LsystemInterpretor(string grammarFilePath, Lsystem lsystem, int nbIteration)
-    {
-        this.lsystem = lsystem;
-        this.nbIteration = nbIteration;
-        this.grammarFilePath = grammarFilePath;
-
-    }
-
-    //method that takes a file containing a grammar and modifies the lsystem object accordingly
-    public void interpret()
-    {
-        // Read the grammar file
-        string[] lines = File.ReadAllLines(this.grammarFilePath);
+    public static Lsystem ParseFile(string filePath){
+        string[] lines = File.ReadAllLines(filePath);
 
         // Parse the variables, constants, start symbol, and angle
         List<string> variables = parseList(lines[0]);
@@ -53,21 +37,14 @@ class LsystemInterpretor
             }
         }
 
-        // Update the Lsystem object
-        this.lsystem.variables = variables;
-        this.lsystem.constantes = constants;
-        this.lsystem.axiom = startSymbol;
-        this.lsystem.current = startSymbol;
-        this.lsystem.rules = rules;
-        this.lsystem.angle = angle;
-
-        // Generate the L-system
-        // this.lsystem.Generate(this.nbIteration);
+        Lsystem lsystem = new Lsystem(variables, constants, startSymbol, rules, angle);
+        return lsystem;
     }
 
+    
     // methods for parsing the grammar file
 
-    private List<string> parseList(string line)
+    private static List<string> parseList(string line)
     {
         //Split line by ':' and ',' and remove empty entries
         string[] tokens = line.Split(new char[] { ':', ',' }, StringSplitOptions.RemoveEmptyEntries);
@@ -84,20 +61,18 @@ class LsystemInterpretor
         return list;
     }
 
-    private string parseStartSymbol(string line)
+    private static string parseStartSymbol(string line)
     {
         string startSymbol = line.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries)[1].Trim();
         //Debug.Log("parsed start symbol = " + startSymbol);
         return startSymbol;
     }
 
-    private float parseAngle(string line)
+    private static float parseAngle(string line)
     {
         float angle = float.Parse(line.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries)[1].Trim());
         //Debug.Log("parsed angle = " + angle);
         return angle;
     }
-
-    
 
 }
