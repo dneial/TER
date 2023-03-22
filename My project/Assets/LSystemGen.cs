@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ScriptGen1 : MonoBehaviour
+public class LSystemGen : MonoBehaviour
 {
     Lsystem lsystem;
 
