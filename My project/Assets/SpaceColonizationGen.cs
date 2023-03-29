@@ -7,14 +7,21 @@ public class SpaceColonizationGen : MonoBehaviour
 {
     private Vector3 startPos = new Vector3(0, 0, 0);
     private Vector3 center = new Vector3(0, 10, 0);
+
+    public float leaf_kill_distance = 1f;
+    public float leaf_influence_radius = 9f;
+
     private float radius = 10f;
     private float step = 1f;
 
     private List<Leaf> leaves;
+    private List<GameObject> node_links = new List<GameObject>();
 
     private List<Node> nodes = new List<Node>() {
         new Node(Vector3.zero, Vector3.up)
     };
+
+    private bool started = false;
 
     public SpaceColonizationGen() {
     }
@@ -30,9 +37,16 @@ public class SpaceColonizationGen : MonoBehaviour
     public void Update()
     {
         if(Input.GetKeyDown(KeyCode.Space)) {
+            while(this.leaves.Count > 0) this.Generate();
+        }
+
+        if(Input.GetKeyDown(KeyCode.RightArrow))
+        {
             if(this.leaves.Count > 0) this.Generate();
             else Debug.Log("No more leaves");
         }
+
+        
     }
 
 
@@ -48,7 +62,7 @@ public class SpaceColonizationGen : MonoBehaviour
             sphere.transform.localScale = new Vector3(1f, 1f, 1f);
             sphere.transform.position = position;
             sphere.GetComponent<Renderer>().material.color = Color.red;
-            Leaf leaf = new Leaf(i, position);
+            Leaf leaf = new Leaf(i, position, this.leaf_kill_distance, this.leaf_influence_radius);
             leaf.gameobject = sphere;
             leaves.Add(leaf);
         }
@@ -104,7 +118,7 @@ public class SpaceColonizationGen : MonoBehaviour
         {
             node = this.nodes[i];
             if(node.isInfluenced) {
-                node.direction /= node.influences;
+                node.direction /= node.influences + 1;
                 node.direction.Normalize();
 
                 node.influences = 0;
@@ -113,8 +127,6 @@ public class SpaceColonizationGen : MonoBehaviour
                 newNode = node.GetNext();
                 newNodes.Add(newNode);
 
-                Debug.Log("new node " + newNode.id + " created at " + newNode.position);
-                
                 node.direction = node.originalDirection;
             }
         }
@@ -184,7 +196,8 @@ public class SpaceColonizationGen : MonoBehaviour
         }
     }
 
-    private void LinkNodes(List<Node> nodes) {
+    private void LinkNodes(List<Node> nodes) 
+    {
         foreach(Node node in nodes){
             if(node.parent != null){
                 GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -192,6 +205,7 @@ public class SpaceColonizationGen : MonoBehaviour
                 cylinder.transform.position = (node.position + node.parent.position) / 2f;
                 cylinder.transform.localScale = new Vector3(0.1f, 0.1f, Vector3.Distance(node.position, node.parent.position));
                 cylinder.transform.LookAt(node.position);
+                this.node_links.Add(cylinder);
             }
         }
     }

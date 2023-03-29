@@ -7,13 +7,15 @@ public class Leaf {
     public long id { get; }
     public Vector3 position { get; }
     public GameObject gameobject { get; set; }
-    public float kill_distance { get; set; } = 1f;
-    public float influence_radius {get; set; } = 9f;
+    public float kill_distance { get; set; }
+    public float influence_radius {get; set; }
     public bool reached { get; set; } = false;
 
-    public Leaf(long id, Vector3 position) {
+    public Leaf(long id, Vector3 position, float kill_distance = 1f, float influence_radius = 9f) {
         this.id = id;
         this.position = position;
+        this.kill_distance = kill_distance;
+        this.influence_radius = influence_radius;
     }
 
     public Node FindClosestNode(List<Node> nodes) {
