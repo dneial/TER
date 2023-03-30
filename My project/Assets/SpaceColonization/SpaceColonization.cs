@@ -3,53 +3,42 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
-public class SpaceColonizationGen : MonoBehaviour
+public class SpaceColonization
 {
     private Vector3 startPos = new Vector3(0, 0, 0);
     private Vector3 center = new Vector3(0, 10, 0);
 
-    public float leaf_kill_distance = 1f;
-    public float leaf_influence_radius = 9f;
+    private float leaf_kill_distance = 1f;
+    private float leaf_influence_radius = 9f;
 
     private float radius = 10f;
-    private float step = 1f;
 
-    private List<Leaf> leaves;
+    private List<Leaf> leaves { get; set; }
     private List<GameObject> node_links = new List<GameObject>();
 
     private List<Node> nodes = new List<Node>() {
         new Node(Vector3.zero, Vector3.up)
     };
 
-    private bool started = false;
+    private GameObject root;
 
-    public SpaceColonizationGen() {
-    }
+    public bool done { get; set; } = false;
+    public int steps { get; set; } = 0;
 
-    public void Start()
+    public SpaceColonization(float leaf_kill_distance = 1f, float leaf_influence_radius = 9f, int nbPoints = 100)
     {
-        this.leaves = this.PlaceLeaves(100);
+        this.leaf_kill_distance = leaf_kill_distance;
+        this.leaf_influence_radius = leaf_influence_radius;
+
+        this.root = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        root.name = "Root";
+        root.transform.position = this.startPos;
+
+        this.leaves = this.PlaceLeaves(nbPoints);
+
         this.GenerateRoot();
-        
     }
-
-
-    public void Update()
-    {
-        if(Input.GetKeyDown(KeyCode.Space)) {
-            while(this.leaves.Count > 0) this.Generate();
-        }
-
-        if(Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            if(this.leaves.Count > 0) this.Generate();
-            else Debug.Log("No more leaves");
-        }
-
-        
-    }
-
-
+    
     // place x number of points around the center
     private List<Leaf> PlaceLeaves(int nbPoints) {
         List<Leaf> leaves = new List<Leaf>();
@@ -61,15 +50,12 @@ public class SpaceColonizationGen : MonoBehaviour
             sphere.name = "Leaf " + i;
             sphere.transform.localScale = new Vector3(1f, 1f, 1f);
             sphere.transform.position = position;
-            sphere.GetComponent<Renderer>().material.color = Color.red;
+            sphere.transform.parent = this.root.transform;
             Leaf leaf = new Leaf(i, position, this.leaf_kill_distance, this.leaf_influence_radius);
             leaf.gameobject = sphere;
             leaves.Add(leaf);
         }
 
-        GameObject root = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        root.name = "Root";
-        root.transform.position = this.startPos;
 
         return leaves;
     }
@@ -80,28 +66,25 @@ public class SpaceColonizationGen : MonoBehaviour
         return direction;
     }
 
-    private void Generate() 
+    public void Generate() 
     {
-
         this.AttractNodes();
-
         this.DropLeaves();
-
         this.GrowNodes();
-       
+        this.steps++;
     }
 
+
+    // Pour chaque feuille, on cherche le noeud le plus proche. 
+    // Si le noeud est dans le rayon d'influence, on change sa direction vers la feuille.
     private void AttractNodes()
     {
-    
         Leaf leaf;
         Node closest = null;
-    
         for(int i = 0; i < this.leaves.Count; i++)
         {
             leaf = this.leaves[i];
             closest = leaf.FindClosestNode(this.nodes);
-
             if (closest != null) {
                 closest.direction += this.GetDirection(closest.position, leaf.position);
                 closest.influences++;
@@ -110,6 +93,9 @@ public class SpaceColonizationGen : MonoBehaviour
         }
     }
 
+
+    // Pour chaque noeud influencé, on crée une nouvelle branche positionnée dans la direction du noeud. 
+    // Le noeud fils hérite de la direction du noeud père.
     private void GrowNodes()
     {
         List<Node> newNodes = new List<Node>();
@@ -134,9 +120,27 @@ public class SpaceColonizationGen : MonoBehaviour
         this.nodes.AddRange(newNodes);
         this.LinkNodes(newNodes);
 
-        newNodes.Clear();
     }
 
+    // Retire les feuilles qui ont été atteintes par un noeud.
+    private void DropLeaves() {
+        List<Leaf> to_remove = new List<Leaf>();
+
+        foreach (Leaf leaf in this.leaves) {
+            if (leaf.reached) {
+                to_remove.Add(leaf);
+            }
+        }
+
+        foreach (Leaf leaf in to_remove) {
+            this.leaves.Remove(leaf);
+            UnityEngine.Object.DestroyImmediate(leaf.gameobject);
+        }
+
+        this.done = this.leaves.Count == 0;
+    }
+
+    // Première étape de la génération: tant que le noeud racine n'est pas influencé par une feuille, on avance d'un pas dans la direction définie par défaut.
     private Node GenerateRoot()
     {
         Node root = this.nodes[0];
@@ -163,29 +167,10 @@ public class SpaceColonizationGen : MonoBehaviour
                 influencingLeaves.Add(leaf);
             }
         }
-
         return influencingLeaves;
     }
 
 
-
-    private void DropLeaves() {
-
-        List<Leaf> to_remove = new List<Leaf>();
-
-        foreach (Leaf leaf in this.leaves) {
-            if (leaf.reached) {
-                to_remove.Add(leaf);
-            }
-        }
-
-        foreach (Leaf leaf in to_remove) {
-            this.leaves.Remove(leaf);
-            Destroy(leaf.gameobject);
-        }
-
-        
-    }
 
     private void PlaceSphereNodes(List<Node> nodes) {
         foreach(Node node in nodes){
@@ -196,6 +181,7 @@ public class SpaceColonizationGen : MonoBehaviour
         }
     }
 
+    
     private void LinkNodes(List<Node> nodes) 
     {
         foreach(Node node in nodes){
@@ -205,6 +191,7 @@ public class SpaceColonizationGen : MonoBehaviour
                 cylinder.transform.position = (node.position + node.parent.position) / 2f;
                 cylinder.transform.localScale = new Vector3(0.1f, 0.1f, Vector3.Distance(node.position, node.parent.position));
                 cylinder.transform.LookAt(node.position);
+                cylinder.transform.parent = this.root.transform;
                 this.node_links.Add(cylinder);
             }
         }
@@ -226,7 +213,7 @@ public class SpaceColonizationGen : MonoBehaviour
         int[] triangles = new int[segments * 3];
 
         // Define the top vertex
-        vertices[0] = new Vector3(0f, height, 0f);
+        vertices[0] = new Vector3(0f, height/2, 0f);
 
         // Define the vertices around the base of the cone
         for (int i = 1; i <= segments; i++)
@@ -234,7 +221,7 @@ public class SpaceColonizationGen : MonoBehaviour
             float angle = Mathf.PI * 2f / segments * i;
             float x = Mathf.Cos(angle) * radius;
             float z = Mathf.Sin(angle) * radius;
-            vertices[i] = new Vector3(x, height*2, z);
+            vertices[i] = new Vector3(x, height/2, z);
         }
 
         // Define the center of the base
@@ -268,17 +255,17 @@ public class SpaceColonizationGen : MonoBehaviour
             int randomIndex = Random.Range(0, segments);
             randomPoint.x = vertices[randomIndex + 1].x;
             randomPoint.z = vertices[randomIndex + 1].z;
-            randomPoint.y = Random.Range(height, height*1.5f);
+            randomPoint.y = Random.Range(height/2f, height);
 
             // Project the random point onto the inside of the cone
-            float t = 1f - randomPoint.y / height;
+            float t = 1f - Mathf.Abs(randomPoint.y / height);
             randomPoint.x *= t;
             randomPoint.z *= t;
 
             points[i] = randomPoint;
         }
 
-        Destroy(mesh);
+        UnityEngine.Object.DestroyImmediate(mesh);
         return points;
     }
 
@@ -355,7 +342,8 @@ public class SpaceColonizationGen : MonoBehaviour
 
             points[i] = randomPoint;
         }
-        Destroy(mesh);
+
+        UnityEngine.Object.DestroyImmediate(mesh);
         return points;
     }
 }

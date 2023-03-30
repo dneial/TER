@@ -23,16 +23,12 @@ public class Leaf {
         float closestDistance = float.MaxValue;
         foreach (Node node in nodes) {
             float distance = Vector3.Distance(node.position, this.position);
-            Debug.Log("distance leaf " + this.id + " to node " + node.id + ": " + distance);
-
             if (distance <= kill_distance) {
                 this.reached = true;
                 closest = node;
                 break;
             }
-
             else if (distance <= closestDistance && distance <= influence_radius) {
-
                 closest = node;
                 closestDistance = distance;
             }
