@@ -3,7 +3,8 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
-public class Config {
+[System.Serializable]
+public struct Config {
     public string name;
     public float thickness;
     public float length;
@@ -25,6 +26,11 @@ public class Config {
     }
 }
 
+[System.Serializable]
+public class LConfig {
+    public List<Config> myConfigs = new List<Config>();
+}
+
 public class LSystemGen : EditorWindow
 {
 
@@ -38,19 +44,51 @@ public class LSystemGen : EditorWindow
     List<Branche> points = new List<Branche>();
     GameObject parent;
 
+    static int numConfig = 0;
+    static string configName = "";
     static float thickness = 1;
     static float length = 0.75f;
     static int nbIteration = 4;
     static float angle = 25;
     static float noise = 5f;
     static float branch_chance = 0.8f;
-    static int grammar = 0;
+    static int numGrammar = 0;
 
 
     void OnGUI()
     {
+
+        string[] files = Directory.GetFiles(Application.dataPath + "/Grammar/", "*.lsys");
+
+        int cursor = 0;
+        foreach (string path in files){
+            files[cursor] = Path.GetFileName(path);
+            cursor++;
+        }
+
+        LConfig lConfig = new LConfig();
+        if(File.Exists(Application.dataPath + "/Config.json")){
+            lConfig = JsonUtility.FromJson<LConfig>(File.ReadAllText(Application.dataPath + "/Config.json"));
+        }
+        string[] nameLConfig = new string[lConfig.myConfigs.Count+1];
+
+        nameLConfig[0] = "None";
+        cursor = 1;
+        foreach (var jConfig in lConfig.myConfigs) {
+            nameLConfig[cursor] = jConfig.name;
+            cursor++;
+        }
+
+        numConfig = EditorGUILayout.Popup("Pre-Config", numConfig, nameLConfig);
+
+        if(GUILayout.Button("Charger la config")){
+            if(numConfig > 0){
+                chargeConfig(lConfig.myConfigs[numConfig-1], files);
+            }
+        }
+
         GUILayout.Label("Config Name");
-        name = EditorGUILayout.TextField("");
+        configName = EditorGUILayout.TextField("", configName);
 
         GUILayout.Label("Thickness");
         thickness = EditorGUILayout.Slider(thickness, 0, 1);
@@ -70,20 +108,12 @@ public class LSystemGen : EditorWindow
         GUILayout.Label("branch_chance");
         branch_chance = EditorGUILayout.Slider(branch_chance, 0, 1);
 
-        string[] files = Directory.GetFiles(Application.dataPath + "/Grammar/", "*.lsys");
-
-        int cursor = 0;
-        foreach (string path in files){
-            files[cursor] = Path.GetFileName(path);
-            cursor++;
-        }
-
-        grammar = EditorGUILayout.Popup("Grammar", grammar, files); 
+        numGrammar = EditorGUILayout.Popup("Grammar", numGrammar, files);
 
         if(GUILayout.Button("Generate")){
-            //saveConfig(new Config(thickness, length, "test", nbIteration, angle, noise, branch_chance, Application.dataPath + "/Grammar/" + files[grammar]));
+            saveConfig(new Config(thickness, length, configName, nbIteration, angle, noise, branch_chance, files[numGrammar]));
 
-            lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Grammar/" + files[grammar]);
+            lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Grammar/" + files[numGrammar]);
 
             lsystem.Generate(nbIteration);
 
@@ -94,7 +124,6 @@ public class LSystemGen : EditorWindow
         
             Debug.Log(lsystem.current);
         }
-
     }
 
     //regles d'interprétation 3D :
@@ -249,14 +278,28 @@ public class LSystemGen : EditorWindow
 
     private void saveConfig(Config config){
         var path = Application.dataPath + "/Config.json";
-        List<Config> lConfig = new List<Config>();
+        LConfig lConfig = new LConfig();
         if(File.Exists(path)){
-            //lConfig = JsonUtility.FromJson<List<Config>>(File.ReadAllText(path));
-        } else {
-            File.Create(path);
+            lConfig = JsonUtility.FromJson<LConfig>(File.ReadAllText(path));
         }
-        lConfig.Add(config);
+        lConfig.myConfigs.Add(config);
         File.WriteAllText(path, JsonUtility.ToJson(lConfig));
+    }
+
+    private void chargeConfig(Config config, string[] files){
+        configName = config.name;
+        thickness = config.thickness;
+        length = config.length;
+        nbIteration = config.nbIteration;
+        angle = config.angle;
+        noise = config.noise;
+        branch_chance = config.branch_chance;
+        for (int i = 0; i < files.Length; i++){
+            if(files[i].Equals(config.grammar)){
+                numGrammar = i;
+                return;
+            }
+        }
     }
     
 }
