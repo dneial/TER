@@ -9,7 +9,7 @@ public class SpaceColonizationGen : MonoBehaviour
     [Range(1f, 10f)]
     public float leaf_kill_distance = 1f;
 
-    [Range(1f, 10f)]
+    [Range(1f, 100f)]
     public float leaf_influence_radius = 9f;
 
     [Range(50, 1000)]
@@ -19,7 +19,9 @@ public class SpaceColonizationGen : MonoBehaviour
 
     public void Start()
     {
-        this.generator = new SpaceColonization(this.leaf_kill_distance, this.leaf_influence_radius, this.influence_points);
+        this.generator = new SpaceColonization(this.leaf_kill_distance, 
+                                               this.leaf_influence_radius, 
+                                               this.influence_points);
     }
 
 
@@ -32,6 +34,7 @@ public class SpaceColonizationGen : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.RightArrow))
         {
+            Debug.Log("Generating...");
             if(!generator.done) generator.Generate();
             else Debug.Log("Done @ " + generator.steps + " steps");
         }   

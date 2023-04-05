@@ -16,11 +16,14 @@ public class SpaceColonization
     private List<Leaf> leaves { get; set; }
     private List<GameObject> node_links = new List<GameObject>();
 
-    private List<Node> nodes = new List<Node>() {
-        new Node(Vector3.zero, Vector3.up)
-    };
+    private List<Node> nodes = new List<Node>();
+
+    private Node root_node = new Node(Vector3.zero, Vector3.up);
 
     private GameObject root;
+
+    private CrownVolume volume;
+
 
     public bool done { get; set; } = false;
     public int steps { get; set; } = 0;
@@ -34,6 +37,7 @@ public class SpaceColonization
         root.name = "Root";
         root.transform.position = this.startPos;
 
+        this.nodes.Add(this.root_node);
         this.leaves = this.PlaceLeaves(nbPoints);
 
         this.GenerateRoot();
@@ -42,7 +46,9 @@ public class SpaceColonization
     // place x number of points around the center
     private List<Leaf> PlaceLeaves(int nbPoints) {
         List<Leaf> leaves = new List<Leaf>();
-        Vector3[] points = this.GetPointsWithinCone(nbPoints);
+
+        this.volume = CrownVolume.GetCone(32, 15f, 10f);
+        Vector3[] points = this.PlacePointsWithinVolume(nbPoints, this.volume);
 
         for (int i = 0; i < nbPoints; i++) {
             Vector3 position = points[i];
@@ -72,6 +78,22 @@ public class SpaceColonization
         this.DropLeaves();
         this.GrowNodes();
         this.steps++;
+        // random chance to place n new leaves
+        if (Random.Range(0, 100) < 5) {
+
+            Vector3[] points = this.PlacePointsWithinVolume(10, this.volume);
+            for (int i = 0; i < 10; i++) {
+                Vector3 position = points[i];
+                GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                sphere.name = "Leaf " + i;
+                sphere.transform.localScale = new Vector3(1f, 1f, 1f);
+                sphere.transform.position = position;
+                sphere.transform.parent = this.root.transform;
+                Leaf leaf = new Leaf(i, position, this.leaf_kill_distance, this.leaf_influence_radius);
+                leaf.gameobject = sphere;
+                leaves.Add(leaf);
+            }
+        }
     }
 
 
@@ -103,6 +125,7 @@ public class SpaceColonization
         for(int i = 0; i < this.nodes.Count; i++)
         {
             node = this.nodes[i];
+            node.thickness++;
             if(node.isInfluenced) {
                 node.direction /= node.influences + 1;
                 node.direction.Normalize();
@@ -115,9 +138,11 @@ public class SpaceColonization
 
                 node.direction = node.originalDirection;
             }
+            
         }
 
         this.nodes.AddRange(newNodes);
+        this.NormalizeThickness();
         this.LinkNodes(newNodes);
 
     }
@@ -143,7 +168,8 @@ public class SpaceColonization
     // Première étape de la génération: tant que le noeud racine n'est pas influencé par une feuille, on avance d'un pas dans la direction définie par défaut.
     private Node GenerateRoot()
     {
-        Node root = this.nodes[0];
+        this.root_node = this.nodes[0];
+        Node root = this.root_node;
 
         List<Leaf> influenceSet = this.FindInfluencingLeaves(root.position);
         root.isInfluenced = influenceSet.Count > 0;
@@ -152,11 +178,22 @@ public class SpaceColonization
             root = root.GetNext();
             influenceSet = this.FindInfluencingLeaves(root.position);
             root.isInfluenced = influenceSet.Count > 0;
+            foreach(Node node in this.nodes) {
+                node.thickness++;
+            }
             this.nodes.Add(root);
+            this.NormalizeThickness();
         }
 
         this.LinkNodes(this.nodes);
         return root;
+    }
+
+    private void NormalizeThickness(){
+        float thickness = this.root_node.thickness;
+        foreach(Node node in this.nodes) {
+            node.thickness /= thickness;
+        }
     }
 
     private List<Leaf> FindInfluencingLeaves(Vector3 position)
@@ -198,152 +235,29 @@ public class SpaceColonization
     }
 
 
-    private Vector3[] GetPointsWithinCone(int nbPoints)
+    // Generate random points within the given volume
+    private Vector3[] PlacePointsWithinVolume(int nbPoints, CrownVolume volume)
     {
-        // Define the parameters of the cone
-        int segments = 32;
-        float height = 15f;
-        float radius = 10f;
 
-        // Create a new mesh
-        Mesh mesh = new Mesh();
-
-        // Define the vertices and triangles of the cone
-        Vector3[] vertices = new Vector3[segments + 2];
-        int[] triangles = new int[segments * 3];
-
-        // Define the top vertex
-        vertices[0] = new Vector3(0f, height/2, 0f);
-
-        // Define the vertices around the base of the cone
-        for (int i = 1; i <= segments; i++)
-        {
-            float angle = Mathf.PI * 2f / segments * i;
-            float x = Mathf.Cos(angle) * radius;
-            float z = Mathf.Sin(angle) * radius;
-            vertices[i] = new Vector3(x, height/2, z);
-        }
-
-        // Define the center of the base
-        vertices[segments + 1] = new Vector3(0f, height, 0f);
-
-        // Define the triangles of the cone
-        for (int i = 0; i < segments; i++)
-        {
-            triangles[i * 3] = i + 1;
-            triangles[i * 3 + 1] = segments + 1;
-            triangles[i * 3 + 2] = i + 2;
-        }
-
-        // Set the last triangle to wrap around to the first vertex
-        triangles[segments * 3 - 1] = 1;
-
-        // Apply the vertices and triangles to the mesh
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-
-        // Calculate the normals of the mesh
-        mesh.RecalculateNormals();
-
-        // Generate random points within the volume of the cone
         Vector3[] points = new Vector3[nbPoints];
 
         for (int i = 0; i < nbPoints; i++)
         {
-            // Generate a random point on the surface of the cone
+            // Generate a random point on the surface of the volume
             Vector3 randomPoint = Vector3.zero;
-            int randomIndex = Random.Range(0, segments);
-            randomPoint.x = vertices[randomIndex + 1].x;
-            randomPoint.z = vertices[randomIndex + 1].z;
-            randomPoint.y = Random.Range(height/2f, height);
+            int randomIndex = Random.Range(0, volume.segments);
+            randomPoint.x = volume.vertices[randomIndex + 1].x;
+            randomPoint.z = volume.vertices[randomIndex + 1].z;
+            randomPoint.y = Random.Range(volume.height/2f, volume.height);
 
-            // Project the random point onto the inside of the cone
-            float t = 1f - Mathf.Abs(randomPoint.y / height);
+            // Project the random point onto the inside of the volume
+            float t = 1f - Mathf.Abs(randomPoint.y / volume.height);
             randomPoint.x *= t;
             randomPoint.z *= t;
 
             points[i] = randomPoint;
         }
 
-        UnityEngine.Object.DestroyImmediate(mesh);
-        return points;
-    }
-
-
-    public Vector3[] GetPointsWithinConicalCrown(int nbPoints)
-    {
-        // Define the parameters of the cone
-        int segments = 64;
-        float height = 15f;
-        float radius = 10f;
-        float crownHeight = 5f;
-
-        // Create a new mesh
-        Mesh mesh = new Mesh();
-
-        // Define the vertices and triangles of the cone
-        Vector3[] vertices = new Vector3[(segments + 1) * 2];
-        int[] triangles = new int[segments * 6];
-
-        // Define the top vertices
-        vertices[0] = new Vector3(0f, height, 0f);
-        vertices[segments + 1] = new Vector3(0f, height - crownHeight, 0f);
-
-        // Define the vertices around the base of the cone
-        for (int i = 1; i <= segments; i++)
-        {
-            float angle = Mathf.PI * 2f / segments * i;
-            float x = Mathf.Cos(angle) * radius;
-            float z = Mathf.Sin(angle) * radius;
-            vertices[i] = new Vector3(x, height, z);
-            vertices[i + segments + 1] = new Vector3(x, height - crownHeight, z);
-        }
-
-        // Define the triangles of the cone
-        for (int i = 0; i < segments; i++)
-        {
-            triangles[i * 6] = i + 1;
-            triangles[i * 6 + 1] = segments + 1 + i + 1;
-            triangles[i * 6 + 2] = i + 2;
-
-            triangles[i * 6 + 3] = i + 2;
-            triangles[i * 6 + 4] = segments + 1 + i + 1;
-            triangles[i * 6 + 5] = segments + 1 + i + 2;
-        }
-
-        // Set the last triangle to wrap around to the first vertex
-        triangles[segments * 6 - 1] = 1;
-
-        // Apply the vertices and triangles to the mesh
-        mesh.vertices = vertices;
-        mesh.triangles = triangles;
-
-        // Calculate the normals of the mesh
-        mesh.RecalculateNormals();
-
-
-
-        // Generate random points within the volume of the cone
-        Vector3[] points = new Vector3[nbPoints];
-
-        for (int i = 0; i < nbPoints; i++)
-        {
-            // Generate a random point on the surface of the cone
-            Vector3 randomPoint = Vector3.zero;
-            int randomIndex = Random.Range(0, segments);
-            randomPoint.x = vertices[randomIndex + 1].x;
-            randomPoint.z = vertices[randomIndex + 1].z;
-            randomPoint.y = Random.Range(0f, height);
-
-            // Project the random point onto the inside of the cone
-            float t = 1f - randomPoint.y / height;
-            randomPoint.x *= t;
-            randomPoint.z *= t;
-
-            points[i] = randomPoint;
-        }
-
-        UnityEngine.Object.DestroyImmediate(mesh);
         return points;
     }
 }
