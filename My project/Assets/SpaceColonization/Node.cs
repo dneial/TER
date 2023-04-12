@@ -12,6 +12,7 @@ public class Node {
     public float thickness { get; set; } = 1f;
     public int influences { get; set; } = 0;
     public bool isInfluenced { get; set; } = false;
+    public GameObject cylindre { get; set; } = null;
     static int counter = 0;
     public int id { get; }
 
