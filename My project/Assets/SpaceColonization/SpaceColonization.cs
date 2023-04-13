@@ -115,16 +115,16 @@ public class SpaceColonization
         for(int i = 0; i < this.nodes.Count; i++)
         {
             node = this.nodes[i];
-            node.thickness++;
             if(node.isInfluenced) {
                 node.direction /= node.influences + 1;
                 node.direction.Normalize();
-
                 node.influences = 0;
                 node.isInfluenced = false;
                 
                 newNode = node.GetNext();
                 newNodes.Add(newNode);
+
+                growThickness(newNode);
 
                 node.direction = node.originalDirection;
             }
@@ -132,9 +132,16 @@ public class SpaceColonization
         }
 
         this.nodes.AddRange(newNodes);
-        this.NormalizeThickness();
+        //this.NormalizeThickness();
         this.LinkNodes(newNodes);
 
+    }
+
+    private void growThickness(Node node){
+        if(node.parent != null){
+            node.parent.thickness++;
+            growThickness(node.parent);
+        }
     }
 
     // Retire les feuilles qui ont été atteintes par un noeud.
@@ -168,11 +175,9 @@ public class SpaceColonization
             root = root.GetNext();
             influenceSet = this.FindInfluencingLeaves(root.position);
             root.isInfluenced = influenceSet.Count > 0;
-            foreach(Node node in this.nodes) {
-                node.thickness++;
-            }
+            growThickness(root);
             this.nodes.Add(root);
-            this.NormalizeThickness();
+            //this.NormalizeThickness();
         }
 
         this.LinkNodes(this.nodes);
@@ -213,12 +218,14 @@ public class SpaceColonization
     {
         foreach(Node node in nodes){
             if(node.parent != null){
-                GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 cylinder.name = "Node(" + node.parent.id + ", " + node.id + ")";
                 cylinder.transform.position = (node.position + node.parent.position) / 2f;
-                cylinder.transform.localScale = new Vector3(0.1f, 0.1f, Vector3.Distance(node.position, node.parent.position));
-                cylinder.transform.LookAt(node.position);
+                cylinder.transform.localScale = new Vector3(1f, Vector3.Distance(node.position, node.parent.position), 1f);
                 cylinder.transform.parent = this.root.transform;
+                cylinder.transform.LookAt(node.position);
+                cylinder.transform.Rotate(Vector3.right, 90);
+                node.cylindre = cylinder;
                 this.node_links.Add(cylinder);
             }
         }
