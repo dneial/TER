@@ -30,6 +30,7 @@ public class SpaceColonization
 
     public SpaceColonization(float leaf_kill_distance = 1f, float leaf_influence_radius = 9f, int nbPoints = 100)
     {
+        
         this.leaf_kill_distance = leaf_kill_distance;
         this.leaf_influence_radius = leaf_influence_radius;
 
@@ -38,6 +39,7 @@ public class SpaceColonization
         root.transform.position = this.startPos;
 
         this.nodes.Add(this.root_node);
+
         this.leaves = this.PlaceLeaves(nbPoints);
 
         this.GenerateRoot();
@@ -48,7 +50,9 @@ public class SpaceColonization
         List<Leaf> leaves = new List<Leaf>();
 
         this.volume = CrownVolume.GetCone(32, 15f, 10f);
+        
         Vector3[] points = this.PlacePointsWithinVolume(nbPoints, this.volume);
+
 
         for (int i = 0; i < nbPoints; i++) {
             Vector3 position = points[i];
@@ -74,26 +78,12 @@ public class SpaceColonization
 
     public void Generate() 
     {
+
         this.AttractNodes();
         this.DropLeaves();
         this.GrowNodes();
         this.steps++;
-        // random chance to place n new leaves
-        if (Random.Range(0, 100) < 5) {
 
-            Vector3[] points = this.PlacePointsWithinVolume(10, this.volume);
-            for (int i = 0; i < 10; i++) {
-                Vector3 position = points[i];
-                GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                sphere.name = "Leaf " + i;
-                sphere.transform.localScale = new Vector3(1f, 1f, 1f);
-                sphere.transform.position = position;
-                sphere.transform.parent = this.root.transform;
-                Leaf leaf = new Leaf(i, position, this.leaf_kill_distance, this.leaf_influence_radius);
-                leaf.gameobject = sphere;
-                leaves.Add(leaf);
-            }
-        }
     }
 
 

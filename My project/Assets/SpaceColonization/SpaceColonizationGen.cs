@@ -22,6 +22,8 @@ public class SpaceColonizationGen : MonoBehaviour
         this.generator = new SpaceColonization(this.leaf_kill_distance, 
                                                this.leaf_influence_radius, 
                                                this.influence_points);
+
+        
     }
 
 
