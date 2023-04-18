@@ -6,7 +6,6 @@ using UnityEditor;
 public class Leaf {
     public long id { get; }
     public Vector3 position { get; }
-    public GameObject gameobject { get; set; }
     public float kill_distance { get; set; }
     public float influence_radius {get; set; }
     public bool reached { get; set; } = false;

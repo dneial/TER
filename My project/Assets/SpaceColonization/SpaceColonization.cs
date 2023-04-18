@@ -1,26 +1,23 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
-using UnityEditor;
 
 public class SpaceColonization
 {
     private Vector3 startPos = new Vector3(0, 0, 0);
     private Vector3 center = new Vector3(0, 10, 0);
 
-    private float leaf_kill_distance = 1f;
-    private float leaf_influence_radius = 9f;
+    private float leaf_kill_distance;
+    private float leaf_influence_radius;
+    private int influence_points;
 
     private float radius = 10f;
 
-    private List<Leaf> leaves { get; set; }
-    //private List<GameObject> node_links = new List<GameObject>();
+    private List<Leaf> leaves { get; set; } = new List<Leaf>();
 
     private List<Node> nodes = new List<Node>();
 
     private Node root_node = new Node(Vector3.zero, Vector3.up);
-
-    //private GameObject root;
 
     private CrownVolume volume;
 
@@ -28,41 +25,42 @@ public class SpaceColonization
     public bool done { get; set; } = false;
     public int steps { get; set; } = 0;
 
-    public SpaceColonization(float leaf_kill_distance = 1f, float leaf_influence_radius = 9f, int nbPoints = 100)
+    public SpaceColonization(
+        float leaf_kill_distance = 1f, 
+        float leaf_influence_radius = 9f, 
+        int nb_points = 100)
     {
         
         this.leaf_kill_distance = leaf_kill_distance;
         this.leaf_influence_radius = leaf_influence_radius;
-
-        this.root = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        root.name = "Root";
-        root.transform.position = this.startPos;
+        this.influence_points = nb_points;
 
         this.nodes.Add(this.root_node);
+        
+        this.GenerateVolume(32, 15f, 10f);
 
-        this.leaves = this.PlaceLeaves(nbPoints);
+    }
 
+    public void start(){
+        this.leaves.AddRange(this.PlaceLeaves(this.influence_points));
         this.GenerateRoot();
     }
     
+    private void GenerateVolume(int nb_points, float radius, float height) {
+        this.volume = CrownVolume.GetCone(nb_points, radius, height);
+    }
+
     // place x number of points around the center
     private List<Leaf> PlaceLeaves(int nbPoints) {
+
         List<Leaf> leaves = new List<Leaf>();
 
-        this.volume = CrownVolume.GetCone(32, 15f, 10f);
-        
         Vector3[] points = this.PlacePointsWithinVolume(nbPoints, this.volume);
 
 
         for (int i = 0; i < nbPoints; i++) {
             Vector3 position = points[i];
-            // GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            // sphere.name = "Leaf " + i;
-            // sphere.transform.localScale = new Vector3(1f, 1f, 1f);
-            // sphere.transform.position = position;
-            // sphere.transform.parent = this.root.transform;
             Leaf leaf = new Leaf(i, position, this.leaf_kill_distance, this.leaf_influence_radius);
-            //leaf.gameobject = sphere;
             leaves.Add(leaf);
         }
 
@@ -76,14 +74,14 @@ public class SpaceColonization
         return direction;
     }
 
-    public void Generate() 
+    public (List<Leaf>, List<Node>) Generate() 
     {
-
         this.AttractNodes();
-        this.DropLeaves();
-        this.GrowNodes();
+        List<Leaf> dropped_leaves = this.DropLeaves();
+        List<Node> new_nodes = this.GrowNodes();
         this.steps++;
 
+        return (dropped_leaves, new_nodes);
     }
 
 
@@ -108,7 +106,7 @@ public class SpaceColonization
 
     // Pour chaque noeud influencé, on crée une nouvelle branche positionnée dans la direction du noeud. 
     // Le noeud fils hérite de la direction du noeud père.
-    private void GrowNodes()
+    private List<Node> GrowNodes()
     {
         List<Node> newNodes = new List<Node>();
         Node node, newNode;
@@ -132,8 +130,7 @@ public class SpaceColonization
         }
 
         this.nodes.AddRange(newNodes);
-        //this.NormalizeThickness();
-        //this.LinkNodes(newNodes);
+        return newNodes;
 
     }
 
@@ -145,7 +142,7 @@ public class SpaceColonization
     }
 
     // Retire les feuilles qui ont été atteintes par un noeud.
-    private void DropLeaves() {
+    private List<Leaf> DropLeaves() {
         List<Leaf> to_remove = new List<Leaf>();
 
         foreach (Leaf leaf in this.leaves) {
@@ -154,12 +151,11 @@ public class SpaceColonization
             }
         }
 
-        // foreach (Leaf leaf in to_remove) {
-        //     this.leaves.Remove(leaf);
-        //     UnityEngine.Object.DestroyImmediate(leaf.gameobject);
-        // }
+        this.leaves.RemoveAll(leaf => leaf.reached);
 
         this.done = this.leaves.Count == 0;
+
+        return to_remove;
     }
 
     // Première étape de la génération: tant que le noeud racine n'est pas influencé par une feuille, on avance d'un pas dans la direction définie par défaut.
@@ -179,7 +175,6 @@ public class SpaceColonization
             this.nodes.Add(root);
         }
 
-        //this.LinkNodes(this.nodes);
         return root;
     }
 
@@ -200,19 +195,6 @@ public class SpaceColonization
         }
         return influencingLeaves;
     }
-
-
-
-    // private void PlaceSphereNodes(List<Node> nodes) {
-    //     foreach(Node node in nodes){
-    //         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-    //         sphere.name = "Node " + node.id;
-    //         sphere.transform.localScale = new Vector3(1f, 1f, 1f);
-    //         sphere.transform.position = node.position;
-    //     }
-    // }
-
-
 
 
     // Generate random points within the given volume
@@ -239,5 +221,13 @@ public class SpaceColonization
         }
 
         return points;
+    }
+
+    public List<Node> GetNodes() {
+        return this.nodes;
+    }
+
+    public List<Leaf> GetLeaves() {
+        return this.leaves;
     }
 }

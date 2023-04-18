@@ -16,6 +16,7 @@ public class SpaceColonizationGen : MonoBehaviour
     public int influence_points = 100;
 
     SpaceColonization generator;
+    SpaceColonizationView view;
 
     public void Start()
     {
@@ -23,23 +24,42 @@ public class SpaceColonizationGen : MonoBehaviour
                                                this.leaf_influence_radius, 
                                                this.influence_points);
 
-        
+        this.view = new SpaceColonizationView();
+
+        this.generator.start();
+        this.view.update(this.generator.GetLeaves());
+        this.view.update(this.generator.GetNodes());
     }
 
 
     public void Update()
     {
         if(Input.GetKeyDown(KeyCode.Space)) {
-            while(!generator.done) generator.Generate();
+            while(!generator.done) {
+                generator.Generate();
+            }
+            
+            view.update(generator.GetNodes()); 
+            view.DropLeaves(generator.GetLeaves());
+
             Debug.Log("Done @ " + generator.steps + " steps");
         }
 
         if(Input.GetKeyDown(KeyCode.RightArrow))
         {
             Debug.Log("Generating...");
-            if(!generator.done) generator.Generate();
+            if(!generator.done) {
+                this.GenerateAndShow();
+            }
             else Debug.Log("Done @ " + generator.steps + " steps");
         }   
     }
 
+
+    public void GenerateAndShow()
+    {
+        (List<Leaf>, List<Node>) gen = this.generator.Generate();
+        this.view.DropLeaves(gen.Item1);
+        this.view.update(gen.Item2);
+    }
 }
