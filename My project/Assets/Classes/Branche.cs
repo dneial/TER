@@ -46,4 +46,25 @@ public class Branche
         this.gameobject = gameobject;
     }
 
+    public void addGameObject() {
+        this.gameobject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+    }
+
+    // method to set the radius of the branch in x and y axis
+    public void setRadius(float radius){
+        this.gameobject.transform.localScale = new Vector3(radius, radius, this.gameobject.transform.localScale.z);
+    }
+    public void setHeading(float heading){
+        this.gameobject.transform.rotation = Quaternion.Euler(heading, 0, 0);
+    }
+    public void setPitch(float pitch){
+        this.gameobject.transform.rotation = Quaternion.Euler(0, pitch, 0);
+    }
+    public void setRoll(float roll){
+        this.gameobject.transform.rotation = Quaternion.Euler(0, 0, roll);
+    }
+    public void setStep(float step){
+        this.gameobject.transform.position = this.gameobject.transform.position + this.gameobject.transform.forward * step;
+    }
+
 }

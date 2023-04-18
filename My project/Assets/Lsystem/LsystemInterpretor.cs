@@ -19,6 +19,10 @@ class LsystemInterpretor
         Dictionary<char, List<Rule>> rules = new Dictionary<char, List<Rule>>();
         for (int i = 4; i < lines.Length; i++)
         {
+            if (lines[i].Length == 0 || lines[i].Contains("rules") || lines[i][0] == '#')
+            {
+                continue;
+            }
             string[] rule = lines[i].Split(new char[] { ' ', '=' }, StringSplitOptions.RemoveEmptyEntries);
             if (rule.Length != 0)
             {

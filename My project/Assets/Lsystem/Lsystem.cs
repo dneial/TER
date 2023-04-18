@@ -54,6 +54,7 @@ class Lsystem {
                 }
             }
             current = next;
+            // Debug.Log("current = " + current);
         }
 
         Debug.Log("generated string = " + current);
