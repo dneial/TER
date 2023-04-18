@@ -3,75 +3,10 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
-public class LSystemGen2 : EditorWindow
+public class LSystemGen2
 {
 
-    [MenuItem("GameObject/L-System2")]
-    public static void showWindow() {
-        EditorWindow window = GetWindow(typeof(LSystemGen2));
-        window.Show();
-    }
 
-    LsystemV2 lsystem;
-    GameObject parent;
-
-    static float thickness = 1;
-    static float length = 0.75f;
-    static int nbIteration = 3;
-    static float angle = 25;
-    static float noise = 5f;
-    static float branch_chance = 0.8f;
-    static int grammar = 0;
-
-
-
-    void OnGUI()
-    {
-        GUILayout.Label("Config Name");
-        name = EditorGUILayout.TextField("");
-
-        GUILayout.Label("Thickness");
-        thickness = EditorGUILayout.Slider(thickness, 0, 1);
-
-        GUILayout.Label("Length");
-        length = EditorGUILayout.Slider(length, 0, 1);
-
-        GUILayout.Label("nbIteration");
-        nbIteration = EditorGUILayout.IntSlider(nbIteration, 1, 10);
-
-        GUILayout.Label("angle");
-        angle = EditorGUILayout.Slider(angle, 0, 360);
-        
-        GUILayout.Label("noise");
-        noise = EditorGUILayout.Slider(noise, 0, 360);
-
-        GUILayout.Label("branch_chance");
-        branch_chance = EditorGUILayout.Slider(branch_chance, 0, 1);
-
-        string[] files = Directory.GetFiles(Application.dataPath + "/GrammarV2/", "*.lsys");
-
-        int cursor = 0;
-        foreach (string path in files){
-             files[cursor] = Path.GetFileName(path);
-            cursor++;
-        }
-
-        grammar = EditorGUILayout.Popup("Grammar", grammar, files); 
-
-        if(GUILayout.Button("Generate")){
-            //saveConfig(new Config(thickness, length, "test", nbIteration, angle, noise, branch_chance, Application.dataPath + "/Grammar/" + files[grammar]));
-
-            lsystem = LsystemInterpretorV2.ParseFile(Application.dataPath + "/GrammarV2/" + files[grammar]);
-
-            lsystem.Generate(nbIteration);
-
-            parent = new GameObject();
-
-            ParseAndPlace(lsystem.current);
-        
-            Debug.Log("\nFIN : "+lsystem.current+"\n-----------\n");
-        }
-    }
 
     //regles d'interprétation 3D :
 
@@ -334,87 +269,5 @@ public class LSystemGen2 : EditorWindow
             Debug.Log(branches[i]);
         }
     } 
-
-    private void saveConfig(Config config){
-        var path = Application.dataPath + "/Config.json";
-        List<Config> lConfig = new List<Config>();
-        if(File.Exists(path)){
-            //lConfig = JsonUtility.FromJson<List<Config>>(File.ReadAllText(path));
-        } else {
-            File.Create(path);
-        }
-        lConfig.Add(config);
-        File.WriteAllText(path, JsonUtility.ToJson(lConfig));
-    }
-
-public class PointInPolyhedronTest : MonoBehaviour
-{
-    // The eight vertices of the polyhedron
-    public Vector3 a, b, c, d, e, f, g, h;
-
-    // The point to test
-    public Vector3 x;
-
-    void Start()
-    {
-        // Define the six faces of the polyhedron
-        Vector3[] faceABCD = { a, b, c, d };
-        Vector3[] faceADHE = { a, d, h, e };
-        Vector3[] faceEFGH = { e, f, g, h };
-        Vector3[] faceBFHG = { b, f, h, g };
-        Vector3[] faceACGF = { a, c, g, f };
-        Vector3[] faceBDEC = { b, d, e, c };
-
-        // Test if the point is inside any of the six faces
-        bool isInside = PointInPolyhedron(x, faceABCD) ||
-                        PointInPolyhedron(x, faceADHE) ||
-                        PointInPolyhedron(x, faceEFGH) ||
-                        PointInPolyhedron(x, faceBFHG) ||
-                        PointInPolyhedron(x, faceACGF) ||
-                        PointInPolyhedron(x, faceBDEC);
-
-        Debug.Log(isInside);
-    }
-
-    // Check if a point is inside a convex polyhedron defined by its vertices
-    bool PointInPolyhedron(Vector3 point, Vector3[] vertices)
-    {
-        // Compute the normal of the plane defined by the first three vertices
-        Vector3 normal = Vector3.Cross(vertices[1] - vertices[0], vertices[2] - vertices[0]);
-
-        // Compute the signed distance between the point and the plane
-        float signedDistance = Vector3.Dot(point - vertices[0], normal);
-
-        // If the point is on the "outside" side of the plane, it is not inside the polyhedron
-        if (signedDistance < 0)
-            return false;
-
-        // Check if the point is inside each triangle formed by the remaining vertices
-        for (int i = 0; i < vertices.Length - 2; i++)
-        {
-            Vector3 v1 = vertices[i + 1] - vertices[0];
-            Vector3 v2 = vertices[i + 2] - vertices[0];
-            Vector3 v3 = point - vertices[0];
-
-            // Compute the barycentric coordinates of the point with respect to the triangle
-            float dot11 = Vector3.Dot(v1, v1);
-            float dot12 = Vector3.Dot(v1, v2);
-            float dot13 = Vector3.Dot(v1, v3);
-            float dot22 = Vector3.Dot(v2, v2);
-            float dot23 = Vector3.Dot(v2, v3);
-            float invDenom = 1 / (dot11 * dot22 - dot12 * dot12);
-            float u = (dot22 * dot13 - dot12 * dot23) * invDenom;
-            float v = (dot11 * dot23 - dot12 * dot13) * invDenom;
-
-            // If the barycentric coordinates are both non-negative and their sum is less than 1, 
-            // the point is inside the triangle and thus inside the polyhedron
-            if (u >= 0 && v >= 0 && u + v < 1)
-            return true;
-    }
-
-    // If the point is not inside any of the triangles, it is not inside the polyhedron
-    return false;
-    }
-}
 
 }

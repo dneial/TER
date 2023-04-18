@@ -14,13 +14,13 @@ public class SpaceColonization
     private float radius = 10f;
 
     private List<Leaf> leaves { get; set; }
-    private List<GameObject> node_links = new List<GameObject>();
+    //private List<GameObject> node_links = new List<GameObject>();
 
     private List<Node> nodes = new List<Node>();
 
     private Node root_node = new Node(Vector3.zero, Vector3.up);
 
-    private GameObject root;
+    //private GameObject root;
 
     private CrownVolume volume;
 
@@ -56,13 +56,13 @@ public class SpaceColonization
 
         for (int i = 0; i < nbPoints; i++) {
             Vector3 position = points[i];
-            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphere.name = "Leaf " + i;
-            sphere.transform.localScale = new Vector3(1f, 1f, 1f);
-            sphere.transform.position = position;
-            sphere.transform.parent = this.root.transform;
+            // GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            // sphere.name = "Leaf " + i;
+            // sphere.transform.localScale = new Vector3(1f, 1f, 1f);
+            // sphere.transform.position = position;
+            // sphere.transform.parent = this.root.transform;
             Leaf leaf = new Leaf(i, position, this.leaf_kill_distance, this.leaf_influence_radius);
-            leaf.gameobject = sphere;
+            //leaf.gameobject = sphere;
             leaves.Add(leaf);
         }
 
@@ -133,7 +133,7 @@ public class SpaceColonization
 
         this.nodes.AddRange(newNodes);
         //this.NormalizeThickness();
-        this.LinkNodes(newNodes);
+        //this.LinkNodes(newNodes);
 
     }
 
@@ -154,10 +154,10 @@ public class SpaceColonization
             }
         }
 
-        foreach (Leaf leaf in to_remove) {
-            this.leaves.Remove(leaf);
-            UnityEngine.Object.DestroyImmediate(leaf.gameobject);
-        }
+        // foreach (Leaf leaf in to_remove) {
+        //     this.leaves.Remove(leaf);
+        //     UnityEngine.Object.DestroyImmediate(leaf.gameobject);
+        // }
 
         this.done = this.leaves.Count == 0;
     }
@@ -177,10 +177,9 @@ public class SpaceColonization
             root.isInfluenced = influenceSet.Count > 0;
             growThickness(root);
             this.nodes.Add(root);
-            //this.NormalizeThickness();
         }
 
-        this.LinkNodes(this.nodes);
+        //this.LinkNodes(this.nodes);
         return root;
     }
 
@@ -204,32 +203,16 @@ public class SpaceColonization
 
 
 
-    private void PlaceSphereNodes(List<Node> nodes) {
-        foreach(Node node in nodes){
-            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphere.name = "Node " + node.id;
-            sphere.transform.localScale = new Vector3(1f, 1f, 1f);
-            sphere.transform.position = node.position;
-        }
-    }
+    // private void PlaceSphereNodes(List<Node> nodes) {
+    //     foreach(Node node in nodes){
+    //         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+    //         sphere.name = "Node " + node.id;
+    //         sphere.transform.localScale = new Vector3(1f, 1f, 1f);
+    //         sphere.transform.position = node.position;
+    //     }
+    // }
 
-    
-    private void LinkNodes(List<Node> nodes) 
-    {
-        foreach(Node node in nodes){
-            if(node.parent != null){
-                GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-                cylinder.name = "Node(" + node.parent.id + ", " + node.id + ")";
-                cylinder.transform.position = (node.position + node.parent.position) / 2f;
-                cylinder.transform.localScale = new Vector3(1f, Vector3.Distance(node.position, node.parent.position), 1f);
-                cylinder.transform.parent = this.root.transform;
-                cylinder.transform.LookAt(node.position);
-                cylinder.transform.Rotate(Vector3.right, 90);
-                node.cylindre = cylinder;
-                this.node_links.Add(cylinder);
-            }
-        }
-    }
+
 
 
     // Generate random points within the given volume

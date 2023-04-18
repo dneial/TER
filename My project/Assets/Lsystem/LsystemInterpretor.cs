@@ -7,6 +7,8 @@ using UnityEngine;
 class LsystemInterpretor
 {
     public static Lsystem ParseFile(string filePath){
+        string format = filePath.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries)[1];
+
         string[] lines = File.ReadAllLines(filePath);
 
         // Parse the variables, constants, start symbol, and angle
@@ -17,32 +19,62 @@ class LsystemInterpretor
 
         // Parse the production rules
         Dictionary<char, List<Rule>> rules = new Dictionary<char, List<Rule>>();
-        for (int i = 4; i < lines.Length; i++)
+
+
+        if(format == "lsys") 
         {
-            if (lines[i].Length == 0 || lines[i].Contains("rules") || lines[i][0] == '#')
+            for (int i = 4; i < lines.Length; i++)
             {
-                continue;
-            }
-            string[] rule = lines[i].Split(new char[] { ' ', '=' }, StringSplitOptions.RemoveEmptyEntries);
-            if (rule.Length != 0)
-            {
-                char variable = rule[0][0];
-                rules[variable] = new List<Rule>();
-                if(rule.Length == 2)
+                if (lines[i].Length == 0 || lines[i].Contains("rules") || lines[i][0] == '#')
                 {
-                    string production = rule[1];
-                    rules[variable].Add(new Rule(production));
+                    continue;
                 }
-                else{
-                    string production = rule[2];
-                    float probability = float.Parse(rule[1].Trim(new char[] { '(', ')' }));
-                    rules[variable].Add(new Rule(production, probability));
+                string[] rule = lines[i].Split(new char[] { ' ', '=' }, StringSplitOptions.RemoveEmptyEntries);
+                if (rule.Length != 0)
+                {
+                    char variable = rule[0][0];
+                    rules[variable] = new List<Rule>();
+                    if(rule.Length == 2)
+                    {
+                        string production = rule[1];
+                        rules[variable].Add(new Rule(production));
+                    }
+                    else{
+                        string production = rule[2];
+                        float probability = float.Parse(rule[1].Trim(new char[] { '(', ')' }));
+                        rules[variable].Add(new Rule(production, probability));
+                    }
                 }
             }
+        } else if(format == "lsys2") {
+            for (int i = 4; i < lines.Length; i++)
+            {
+                //if line is "rules :", emptyor starts with '#' skip it
+                if (lines[i].Length == 0 || lines[i].Contains("rules") || lines[i][0] == '#')
+                {
+                    continue;
+                }
+
+                string[] rule = lines[i].Split(new char[] { ' ', '=' }, StringSplitOptions.RemoveEmptyEntries);
+                //rule = { "A", "r(180,180)", "F0.5", "H" }}
+
+                char variable = rule[0][0]; // "A"
+                string production = "";     // -> "r(180,180) F0.5 H"
+
+                for (int j = 1; j < rule.Length; j++)
+                {
+                    production += rule[j] + " ";
+                }
+                //delete last space
+                production = production.Substring(0, production.Length - 1);
+            
+                rules[variable] = new List<Rule>();
+                rules[variable].Add(new Rule(production));
+            }
+ 
         }
 
-        Lsystem lsystem = new Lsystem(variables, constants, startSymbol, rules, angle);
-        return lsystem;
+        return new Lsystem(variables, constants, startSymbol, rules, angle);;
     }
 
     

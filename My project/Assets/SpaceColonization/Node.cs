@@ -13,8 +13,9 @@ public class Node {
     public int influences { get; set; } = 0;
     public bool isInfluenced { get; set; } = false;
     public GameObject cylindre { get; set; } = null;
-    static int counter = 0;
     public int id { get; }
+
+    static int counter = 0;
 
     public Node(Vector3 position, Vector3 direction , Node parent = null) {
         this.id = counter++;
