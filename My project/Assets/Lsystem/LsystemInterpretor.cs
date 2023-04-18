@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class LsystemInterpretor
+public class LsystemInterpretor
 {
     public static Lsystem ParseFile(string filePath){
         string format = filePath.Split(new char[] { '.' }, StringSplitOptions.RemoveEmptyEntries)[1];

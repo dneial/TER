@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class LsystemInterpretorV2
+public class LsystemInterpretorV2
 {
     public static LsystemV2 ParseFile(string filePath){
         string[] lines = File.ReadAllLines(filePath);

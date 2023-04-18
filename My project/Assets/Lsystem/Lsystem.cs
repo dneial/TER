@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class Lsystem {
+public class Lsystem {
 
     public string axiom;
     public string current;

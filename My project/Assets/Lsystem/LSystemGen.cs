@@ -3,31 +3,28 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
-
-
-[System.Serializable]
-public class LConfig {
-    public List<Config> myConfigs = new List<Config>();
-}
-
 public class LSystemGen 
 {
+    public Lsystem lsystem;
+    public GameObject parent;
+    public float thickness;
+    public float length;
+    public float angle;
+    public float noise;
+    public float branch_chance;
+    public List<Branche> points = new List<Branche>();
 
-    Lsystem lsystem;
-    List<Branche> points = new List<Branche>();
-    GameObject parent;
+    public LSystemGen(Lsystem lsystem, GameObject parent, float thickness, float length, float angle, float noise, float branch_chance)
+    {
+        this.lsystem = lsystem;
+        this.parent = parent;
+        this.thickness = thickness;
+        this.length = length;
+        this.angle = angle;
+        this.noise = noise;
+        this.branch_chance = branch_chance;
+    }
 
-    static string configName = "";
-    static float thickness = 1;
-    static float length = 0.75f;
-    static int nbIteration = 4;
-    static float angle = 25;
-    static float noise = 5f;
-    static float branch_chance = 0.8f;
-    static int numGrammar = 0;
-
-
-    
     //regles d'interprétation 3D :
 
     // F : Se déplacer d’un pas unitaire (∈ V)
@@ -129,7 +126,7 @@ public class LSystemGen
     }
 
     //fonction récursive pour placer les branches
-    private void PlaceBranches(Branche b)
+    public void PlaceBranches(Branche b)
     {
         Vector3 start = b.getPosition();
         foreach (var fils in b.getChildren())

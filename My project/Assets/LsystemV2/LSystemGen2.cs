@@ -5,7 +5,24 @@ using UnityEditor;
 
 public class LSystemGen2
 {
+    public Lsystem lsystem;
+    public GameObject parent;
+    public int nbBranches = 0;
+    public List<BrancheV2> branches;
+    public Stack<BrancheV2> stackBranches;
+    public Stack<BrancheV2> stackNodes;
+    public Stack<BranchState> stateStack;
 
+    public LSystemGen2(Lsystem lsystem, GameObject parent)
+    {
+        this.lsystem = lsystem;
+        this.parent = parent;
+
+        this.branches = new List<BrancheV2>();
+        this.stackBranches = new Stack<BrancheV2>();
+        this.stackNodes = new Stack<BrancheV2>();
+        this.stateStack = new Stack<BranchState>();
+    }
 
 
     //regles d'interprétation 3D :
@@ -32,20 +49,6 @@ public class LSystemGen2
     // 1 : r(180,180) F0.5 H
     // 2 : r(180,180) F0.5 h20 F(12,2.0) R5 [ C ] B
     // 3 : r(180,180) F0.5 h20 F(12,2.0) R5 [ h-40 F(12,2.0) R5 [ D ] B ] F(5,1.0) R4.5
-  
-    
-    //compteur du nombre de branches
-    int nbBranches = 0;
-
-    //liste des branches
-    List<BrancheV2> branches = new List<BrancheV2>();
-
-    //2 piles : branche courante et embranchement 
-    Stack<BrancheV2> stackBranches = new Stack<BrancheV2>();
-    Stack<BrancheV2> stackNodes = new Stack<BrancheV2>();
-
-    //pile des états des branches
-    Stack<BranchState> stateStack = new Stack<BranchState>();
 
     public void ParseAndPlace(string current)
     {

@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-class Rule {
+public class Rule {
     private float probability;
     private string rule;
 

@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+using UnityEditor;
 public class SpaceColonizationView {
 
     public void PlaceLeaves(List<Leaf> leaves)
@@ -10,7 +14,6 @@ public class SpaceColonizationView {
     public void LinkNodes(List<Node> nodes) 
     {
         foreach(Node node in nodes){
-    static int numConfig = 0;
             if(node.parent != null){
                 GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 cylinder.name = "Node(" + node.parent.id + ", " + node.id + ")";

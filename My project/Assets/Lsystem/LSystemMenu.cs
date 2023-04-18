@@ -3,6 +3,10 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
+[System.Serializable]
+public class LConfig {
+    public List<Config> myConfigs = new List<Config>();
+}
 
 public class LSystemMenu : EditorWindow
 {
@@ -12,8 +16,8 @@ public class LSystemMenu : EditorWindow
         window.Show();
     }
 
-    Lsystem lsystem;
-    GameObject parent;
+    public Lsystem lsystem;
+    public GameObject parent;
 
     static float thickness = 1;
     static float length = 0.75f;
@@ -23,6 +27,10 @@ public class LSystemMenu : EditorWindow
     static float branch_chance = 0.8f;
     static int grammar = 0;
 
+
+    int numConfig;
+    string configName;
+    int numGrammar;
     void OnGUI()
     {
         string[] files = Directory.GetFiles(Application.dataPath + "/Grammar/", "*.lsys");
@@ -78,19 +86,25 @@ public class LSystemMenu : EditorWindow
         numGrammar = EditorGUILayout.Popup("Grammar", numGrammar, files);
 
         if(GUILayout.Button("Generate")){
-            saveConfig(new Config(thickness, length, configName, nbIteration, angle, noise, branch_chance, files[numGrammar]));
-
-            lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Grammar/" + files[numGrammar]);
-
-            lsystem.Generate(nbIteration);
+            saveConfig(new Config(thickness, length, configName, nbIteration, angle, noise, branch_chance, files[numGrammar])); 
 
             parent = new GameObject();
 
+            lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Grammar/" + files[numGrammar]);
 
+            //if extension is .lsys
+            if (files[numGrammar].EndsWith(".lsys"))
+            {
+                LSystemGen generator = new LSystemGen(lsystem, parent, thickness, length, angle, noise, branch_chance);
+                generator.GetPoints(lsystem.current);
+                generator.PlaceBranches(generator.points[0]);
+            }
+            else
+            {                
+                LSystemGen2 generator = new LSystemGen2(lsystem, parent);
+                generator.ParseAndPlace(lsystem.current);
+            }
 
-            GetPoints(lsystem.current);
-            PlaceBranches(points[0]);
-        
             Debug.Log(lsystem.current);
         }
     }
@@ -108,12 +122,12 @@ public class LSystemMenu : EditorWindow
 
     private void chargeConfig(Config config, string[] files){
         configName = config.name;
-        this.lsystem.thickness = config.thickness;
-        this.lsystem.length = config.length;
-        this.lsystem.nbIteration = config.nbIteration;
-        this.lsystem.angle = config.angle;
-        this.lsystem.noise = config.noise;
-        this.lsystem.branch_chance = config.branch_chance;
+        thickness = config.thickness;
+        length = config.length;
+        nbIteration = config.nbIteration;
+        angle = config.angle;
+        noise = config.noise;
+        branch_chance = config.branch_chance;
         for (int i = 0; i < files.Length; i++){
             if(files[i].Equals(config.grammar)){
                 numGrammar = i;
