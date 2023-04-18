@@ -3,10 +3,6 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
-using System.Collections.Generic;
-using System.IO;
-using UnityEngine;
-using UnityEditor;
 public class SpaceColonizationView {
 
     private Dictionary<Leaf, GameObject> leaves = new Dictionary<Leaf, GameObject>();
@@ -45,6 +41,7 @@ public class SpaceColonizationView {
     public void LinkNodes(List<Node> nodes) 
     {
         foreach(Node node in nodes){
+            Debug.Log("Node(" + node.id + ")");
             if(node.parent != null){
                 GameObject capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 capsule.name = "Node(" + node.parent.id + ", " + node.id + ")";

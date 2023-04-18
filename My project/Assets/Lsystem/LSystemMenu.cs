@@ -31,9 +31,10 @@ public class LSystemMenu : EditorWindow
     int numConfig;
     string configName;
     int numGrammar;
+
     void OnGUI()
     {
-        string[] files = Directory.GetFiles(Application.dataPath + "/Grammar/", "*.lsys");
+        string[] files = Directory.GetFiles(Application.dataPath + "/Grammar/", "*.lsys?");
 
         int cursor = 0;
         foreach (string path in files){

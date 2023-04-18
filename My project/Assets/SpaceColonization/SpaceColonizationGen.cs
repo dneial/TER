@@ -36,11 +36,10 @@ public class SpaceColonizationGen : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.Space)) {
             while(!generator.done) {
-                generator.Generate();
+                this.GenerateAndDrop();
             }
-            
-            view.update(generator.GetNodes()); 
-            view.DropLeaves(generator.GetLeaves());
+
+            this.view.update(this.generator.GetNodes());
 
             Debug.Log("Done @ " + generator.steps + " steps");
         }
@@ -61,5 +60,11 @@ public class SpaceColonizationGen : MonoBehaviour
         (List<Leaf>, List<Node>) gen = this.generator.Generate();
         this.view.DropLeaves(gen.Item1);
         this.view.update(gen.Item2);
+    }
+
+    private void GenerateAndDrop()
+    {
+        (List<Leaf>, List<Node>) gen = this.generator.Generate();
+        this.view.DropLeaves(gen.Item1);
     }
 }

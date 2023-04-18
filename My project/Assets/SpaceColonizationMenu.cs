@@ -20,6 +20,7 @@ public class SpaceColonizationMenu : EditorWindow
     static int influence_points = 100;
 
     private SpaceColonization generator;
+    private SpaceColonizationView view;
 
 
     void OnGUI()
@@ -40,7 +41,17 @@ public class SpaceColonizationMenu : EditorWindow
         if(GUILayout.Button("Generate"))
         {
             generator = new SpaceColonization(leaf_kill_distance, leaf_influence_radius, influence_points);
-            while(!generator.done) generator.Generate();
+            view = new SpaceColonizationView();
+
+            this.generator.start();
+            this.view.update(this.generator.GetLeaves());
+            this.view.update(this.generator.GetNodes());
+
+            while(!generator.done) {
+                (List<Leaf>, List<Node>) gen = this.generator.Generate();
+                this.view.DropLeaves(gen.Item1);
+            }
+            this.view.update(this.generator.GetNodes());
         }
 
     }

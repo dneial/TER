@@ -4,10 +4,12 @@ using UnityEngine;
 using UnityEditor;
 
 public class Node {
+    
     public Vector3 position { get; set; }
     public Vector3 direction { get; set; }
     public Vector3 originalDirection { get; set; }
     public Node parent { get; set; }
+
     public float step { get; set; } = 1f;
     public float thickness { get; set; } = 1f;
     public int influences { get; set; } = 0;

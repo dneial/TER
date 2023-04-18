@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using System.IO;
-using UnityEngine;
-using UnityEditor;
 
 public class Config {
     public string name;
