@@ -136,6 +136,10 @@ public class Lsystem {
             {
                tmp += "] ";
             }
+            else 
+            {
+                Debug.Log("erreur de traduction ? : " + current[i]);
+            }
         }
         //retirer le dernier espace
         tmp = tmp.Substring(0, tmp.Length - 1);

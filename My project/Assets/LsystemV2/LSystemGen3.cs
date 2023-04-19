@@ -3,7 +3,7 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
-public class LSystemGen2
+public class LSystemGen3
 {
     public Lsystem lsystem;
     public GameObject parent;
@@ -13,7 +13,7 @@ public class LSystemGen2
     public Stack<BrancheV2> stackNodes;
     public Stack<BranchState> stateStack;
 
-    public LSystemGen2(Lsystem lsystem, GameObject parent)
+    public LSystemGen3(Lsystem lsystem, GameObject parent)
     {
         this.lsystem = lsystem;
         this.parent = parent;
@@ -70,11 +70,7 @@ public class LSystemGen2
 
         foreach (string word in words)
         {
-            if(word == "")
-            {
-                //Debug.Log("empty word");
-            }
-            else if (word[0] == 'h')
+            if (word[0] == 'h' || word[0] == '+')
             {
                 //update heading
                 currentState.heading += valueParse(word.Substring(1));
@@ -123,7 +119,7 @@ public class LSystemGen2
                 branches.Add(b);
 
                 //add the branch to the stack
-                //Debug.Log("pushing new branch : " + b.id);
+                Debug.Log("pushing new branch : " + b.id);
                 stackBranches.Push(b);
 
             }
@@ -168,7 +164,7 @@ public class LSystemGen2
             }
 
             //si le mot est le dernier de la chaine ou ']', on arrondit le bout de la branche
-            if (word != "" && (word == words[words.Length - 1] || word[0] == ']'))
+            if (word == words[words.Length - 1] || word[0] == ']')
             {
                 //dernière branche créée :
                 BrancheV2 tmp = stackBranches.Peek();
@@ -267,8 +263,7 @@ public class LSystemGen2
         sphere.transform.localScale = new Vector3(b.gameobject.transform.localScale.x, b.gameobject.transform.localScale.x, b.gameobject.transform.localScale.x);
         sphere.transform.parent = b.gameobject.transform;
         //random color
-        // sphere.GetComponent<Renderer>().material.color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
-        //red
+        sphere.GetComponent<Renderer>().material.color = new Color(Random.Range(0f, 1f), Random.Range(0f, 1f), Random.Range(0f, 1f));
         // sphere.GetComponent<Renderer>().material.color = new Color(1, 0, 0);
     }
 

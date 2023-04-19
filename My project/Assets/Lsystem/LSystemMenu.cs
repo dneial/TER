@@ -25,7 +25,7 @@ public class LSystemMenu : EditorWindow
     static float angle = 25;
     static float noise = 5f;
     static float branch_chance = 0.8f;
-    static int grammar = 0;
+    //static int grammar = 0;
 
 
     int numConfig;
@@ -95,7 +95,7 @@ public class LSystemMenu : EditorWindow
 
             lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Grammar/" + files[numGrammar]);
             lsystem.Generate(nbIteration);
-            Debug.Log(lsystem.current);
+            //Debug.Log(lsystem.current);
 
             //if extension is .lsys
             if (files[numGrammar].EndsWith(".lsys"))
