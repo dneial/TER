@@ -132,14 +132,15 @@ public class LSystemGen
         foreach (var fils in b.getChildren())
         {
             Vector3 end = fils.getPosition();
-            fils.setGameObject(GameObject.CreatePrimitive(PrimitiveType.Cube));
+            fils.setGameObject(GameObject.CreatePrimitive(PrimitiveType.Cylinder));
 
             fils.getGameObject().name = "edge (" + b.getId() + " " + fils.getId() + ")";
             fils.getGameObject().transform.SetParent(parent.transform);
-
             fils.getGameObject().transform.position = (start + end) / 2;
-            fils.getGameObject().transform.localScale = new Vector3(0.1f, 0.1f, Vector3.Distance(start, end));
+            fils.getGameObject().transform.localScale = new Vector3(0.1f, Vector3.Distance(start, end)/2,  0.1f);
+            
             fils.getGameObject().transform.LookAt(end);
+            fils.getGameObject().transform.Rotate(Vector3.right, 90);
 
             PlaceBranches(fils);
         }

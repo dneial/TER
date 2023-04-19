@@ -106,7 +106,7 @@ public class LsystemInterpretor
 
     private static float parseAngle(string line)
     {
-        float angle = float.Parse(line.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries)[1].Trim());
+        float angle = float.Parse(line.Split(new char[] { ':' }, StringSplitOptions.RemoveEmptyEntries)[1].Trim().Replace('.', ','));
         //Debug.Log("parsed angle = " + angle);
         return angle;
     }

@@ -31,10 +31,12 @@ public class LSystemMenu : EditorWindow
     int numConfig;
     string configName;
     int numGrammar;
-
     void OnGUI()
     {
-        string[] files = Directory.GetFiles(Application.dataPath + "/Grammar/", "*.lsys?");
+        string[] tmp = Directory.GetFiles(Application.dataPath + "/Grammar/", "*.lsys?");
+
+        //trier les fichiers par ordre de leur extension
+        string[] files = sortbyExt(tmp);
 
         int cursor = 0;
         foreach (string path in files){
@@ -92,21 +94,19 @@ public class LSystemMenu : EditorWindow
             parent = new GameObject();
 
             lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Grammar/" + files[numGrammar]);
+            lsystem.Generate(nbIteration);
+            Debug.Log(lsystem.current);
 
             //if extension is .lsys
             if (files[numGrammar].EndsWith(".lsys"))
             {
-                LSystemGen generator = new LSystemGen(lsystem, parent, thickness, length, angle, noise, branch_chance);
-                generator.GetPoints(lsystem.current);
-                generator.PlaceBranches(generator.points[0]);
+                //traduction de la gammaire lsystemV1 en lsystemV2
+                lsystem.trad(thickness, length, angle, noise);
             }
-            else
-            {                
-                LSystemGen2 generator = new LSystemGen2(lsystem, parent);
-                generator.ParseAndPlace(lsystem.current);
-            }
+            LSystemGen2 generator = new LSystemGen2(lsystem, parent);
+            generator.ParseAndPlace(lsystem.current);
 
-            Debug.Log(lsystem.current);
+            
         }
     }
 
@@ -135,6 +135,24 @@ public class LSystemMenu : EditorWindow
                 return;
             }
         }
+    }
+
+    public string[] sortbyExt(string[] files){
+        string[] res = new string[files.Length];
+        int cursor = 0;
+        foreach (string path in files){
+            if (path.EndsWith(".lsys")){
+                res[cursor] = path;
+                cursor++;
+            }
+        }
+        foreach (string path in files){
+            if (path.EndsWith(".lsys2")){
+                res[cursor] = path;
+                cursor++;
+            }
+        }
+        return res;
     }
 
 }

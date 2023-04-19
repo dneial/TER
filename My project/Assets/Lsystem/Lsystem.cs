@@ -81,4 +81,67 @@ public class Lsystem {
 
         return str;
     }
+
+    //traduire la chaine de caractère de lsystem v1 en lsystem v2
+    public void trad(float thickness, float length, float angle, float noise)
+    {
+
+        string t = thickness.ToString();
+        string l = length.ToString();
+        string a = angle.ToString();
+        string n = noise.ToString();
+        
+        string tmp = "";
+
+        for(int i = 0; i < current.Length; i++)
+        {
+            //si on trouve une variable
+            if(variables.Contains(current[i].ToString()))
+            {
+                tmp += "F" + l + " ";
+            }
+            else if(current[i] == '+')
+            {
+               tmp += "h" + a + " ";
+            }
+            else if(current[i] == '-')
+            {
+               tmp += "h-" + a + " ";
+            }
+            else if(current[i] == '&')
+            {
+               tmp += "r" + a + " ";
+            }
+            else if(current[i] == '^')
+            {
+               tmp += "r-" + a + " ";
+            }
+            else if(current[i] == '<')
+            {
+               tmp += "p" + a + " ";
+            }
+            else if(current[i] == '>')
+            {
+               tmp += "p-" + a + " ";
+            }
+            else if (current[i] == '|')
+            {
+                tmp += "h180 ";
+            }
+            else if(current[i] == '[')
+            {
+               tmp += "[ ";
+            }
+            else if(current[i] == ']')
+            {
+               tmp += "] ";
+            }
+        }
+        //retirer le dernier espace
+        tmp = tmp.Substring(0, tmp.Length - 1);
+        this.current = tmp;
+
+        Debug.Log("current = " + this.current);
+    }
+
 }
