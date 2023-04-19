@@ -18,6 +18,7 @@ public class SpaceColonizationMenu : EditorWindow
     static float leaf_influence_radius = 1f;
     static float leaf_kill_distance = 1f;
     static int influence_points = 100;
+    static AnimationCurve thickness = AnimationCurve.EaseInOut(0,0.35f,1,1);
 
     private SpaceColonization generator;
     private SpaceColonizationView view;
@@ -37,6 +38,12 @@ public class SpaceColonizationMenu : EditorWindow
         GUILayout.Label("Influence Points");
         influence_points = EditorGUILayout.IntSlider(influence_points, 50, 1000);
 
+        thickness.AddKey(0.4f, 0.9f);
+        thickness.AddKey(0.3f, 0.8f);
+        thickness.AddKey(0.95f, 1);
+        thickness.SmoothTangents(3, -1);
+        thickness = EditorGUILayout.CurveField("Thickness", thickness);
+
       
         if(GUILayout.Button("Generate"))
         {
@@ -44,14 +51,13 @@ public class SpaceColonizationMenu : EditorWindow
             view = new SpaceColonizationView();
 
             this.generator.start();
-            this.view.update(this.generator.GetLeaves());
-            this.view.update(this.generator.GetNodes());
 
             while(!generator.done) {
                 (List<Leaf>, List<Node>) gen = this.generator.Generate();
-                this.view.DropLeaves(gen.Item1);
             }
-            this.view.update(this.generator.GetNodes());
+            
+            generator.NormalizeThickness();
+            this.view.update(this.generator.GetNodes(), thickness);
         }
 
     }

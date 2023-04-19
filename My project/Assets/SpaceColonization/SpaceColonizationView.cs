@@ -19,9 +19,9 @@ public class SpaceColonizationView {
         this.PlaceLeaves(leaves);
     }
 
-    public void update(List<Node> nodes)
+    public void update(List<Node> nodes, AnimationCurve thickness)
     {
-        this.LinkNodes(nodes);
+        this.LinkNodes(nodes, thickness);
     }
 
 
@@ -38,15 +38,16 @@ public class SpaceColonizationView {
     }
 
 
-    public void LinkNodes(List<Node> nodes) 
+    public void LinkNodes(List<Node> nodes, AnimationCurve thickness) 
     {
         foreach(Node node in nodes){
-            Debug.Log("Node(" + node.id + ")");
             if(node.parent != null){
                 GameObject capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 capsule.name = "Node(" + node.parent.id + ", " + node.id + ")";
                 capsule.transform.position = (node.position + node.parent.position) / 2f;
-                capsule.transform.localScale = new Vector3(1f, Vector3.Distance(node.position, node.parent.position), 1f);
+                Debug.Log(node.thickness);
+                var actualThickness = thickness.Evaluate(node.thickness);
+                capsule.transform.localScale = new Vector3(actualThickness, (actualThickness+Vector3.Distance(node.position, node.parent.position))/2, actualThickness);
                 capsule.transform.parent = this.root.transform;
                 capsule.transform.LookAt(node.position);
                 capsule.transform.Rotate(Vector3.right, 90);

@@ -28,7 +28,7 @@ public class SpaceColonizationGen : MonoBehaviour
 
         this.generator.start();
         this.view.update(this.generator.GetLeaves());
-        this.view.update(this.generator.GetNodes());
+        //this.view.update(this.generator.GetNodes());
     }
 
 
@@ -39,7 +39,7 @@ public class SpaceColonizationGen : MonoBehaviour
                 this.GenerateAndDrop();
             }
 
-            this.view.update(this.generator.GetNodes());
+            //this.view.update(this.generator.GetNodes());
 
             Debug.Log("Done @ " + generator.steps + " steps");
         }
@@ -59,7 +59,7 @@ public class SpaceColonizationGen : MonoBehaviour
     {
         (List<Leaf>, List<Node>) gen = this.generator.Generate();
         this.view.DropLeaves(gen.Item1);
-        this.view.update(gen.Item2);
+        //this.view.update(gen.Item2);
     }
 
     private void GenerateAndDrop()

@@ -178,7 +178,7 @@ public class SpaceColonization
         return root;
     }
 
-    private void NormalizeThickness(){
+    public void NormalizeThickness(){
         float thickness = this.root_node.thickness;
         foreach(Node node in this.nodes) {
             node.thickness /= thickness;
