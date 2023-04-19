@@ -21,6 +21,8 @@ public class SpaceColonization
 
     private CrownVolume volume;
 
+    private Mesh vol;
+
 
     public bool done { get; set; } = false;
     public int steps { get; set; } = 0;
@@ -28,7 +30,9 @@ public class SpaceColonization
     public SpaceColonization(
         float leaf_kill_distance = 1f, 
         float leaf_influence_radius = 9f, 
-        int nb_points = 100)
+        int nb_points = 100,
+        Mesh vol = null
+        )
     {
         
         this.leaf_kill_distance = leaf_kill_distance;
@@ -36,6 +40,8 @@ public class SpaceColonization
         this.influence_points = nb_points;
 
         this.nodes.Add(this.root_node);
+
+        this.vol = vol;
         
         this.GenerateVolume(32, 15f, 10f);
 
@@ -46,8 +52,33 @@ public class SpaceColonization
         this.GenerateRoot();
     }
     
+
+    public void Generate()
+    {
+        this.start();
+        while(!this.done) {
+            this.Grow();
+        }
+        this.NormalizeThickness();
+    }
+
+
+
+
     private void GenerateVolume(int nb_points, float radius, float height) {
-        this.volume = CrownVolume.GetCone(nb_points, radius, height);
+        // Mesh mesh = CrownVolume.GetConeMesh(nb_points, radius, height);
+        // GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        // go.GetComponent<MeshFilter>().mesh = mesh;
+
+        // Vector3[] points = this.PPWV(mesh);
+
+        // foreach(Vector3 point in points) {
+        //     GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        //     obj.transform.position = point;
+        // }
+
+
+        this.volume = CrownVolume.GetCone(nb_points, nb_points/1.4f, nb_points/1.2f);
     }
 
     // place x number of points around the center
@@ -55,12 +86,17 @@ public class SpaceColonization
 
         List<Leaf> leaves = new List<Leaf>();
 
-        Vector3[] points = this.PlacePointsWithinVolume(nbPoints, this.volume);
+        // Vector3[] points = this.PlacePointsWithinVolume(nbPoints, this.volume);
+
+        Vector3[] points = this.PPWV(nbPoints);
 
 
         for (int i = 0; i < nbPoints; i++) {
+            // random between 0 and 1 and test if greater than 0.5
+            // bool repulse = Random.value > 0.75f;
             Vector3 position = points[i];
             Leaf leaf = new Leaf(i, position, this.leaf_kill_distance, this.leaf_influence_radius);
+            // leaf.inversed = repulse;
             leaves.Add(leaf);
         }
 
@@ -74,7 +110,7 @@ public class SpaceColonization
         return direction;
     }
 
-    public (List<Leaf>, List<Node>) Generate() 
+    public (List<Leaf>, List<Node>) Grow() 
     {
         this.AttractNodes();
         List<Leaf> dropped_leaves = this.DropLeaves();
@@ -96,7 +132,10 @@ public class SpaceColonization
             leaf = this.leaves[i];
             closest = leaf.FindClosestNode(this.nodes);
             if (closest != null) {
-                closest.direction += this.GetDirection(closest.position, leaf.position);
+                if(leaf.inversed)
+                    closest.direction -= this.GetDirection(closest.position, leaf.position);
+                else
+                    closest.direction += this.GetDirection(closest.position, leaf.position);
                 closest.influences++;
                 closest.isInfluenced = true;
             }
@@ -216,6 +255,32 @@ public class SpaceColonization
             float t = 1f - Mathf.Abs(randomPoint.y / volume.height);
             randomPoint.x *= t;
             randomPoint.z *= t;
+
+            points[i] = randomPoint;
+        }
+
+        return points;
+    }
+
+    private Vector3[] PPWV(int nb_points)
+    {
+
+        Mesh mesh = this.vol;
+        Vector3[] points = new Vector3[nb_points];
+
+        Vector3 min = mesh.bounds.min;
+        Vector3 max = mesh.bounds.max;
+
+        Debug.Log("min: " + min);
+        Debug.Log("max: " + max);
+
+
+        for (int i = 0; i < nb_points; i++)
+        {
+            Vector3 randomPoint = Vector3.zero;
+            randomPoint.x = Random.Range(min.x, max.x);
+            randomPoint.y = Random.Range(min.y, max.y);
+            randomPoint.z = Random.Range(min.z, max.z);
 
             points[i] = randomPoint;
         }

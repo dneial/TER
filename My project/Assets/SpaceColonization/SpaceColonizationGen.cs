@@ -15,20 +15,29 @@ public class SpaceColonizationGen : MonoBehaviour
     [Range(50, 1000)]
     public int influence_points = 100;
 
+    
     SpaceColonization generator;
     SpaceColonizationView view;
 
     public void Start()
     {
+        GameObject vol = AssetDatabase.LoadAssetAtPath("Assets/Blender_msh/Vol.prefab", typeof(GameObject)) as GameObject;
+        
+        vol.transform.localScale = new Vector3(100, 100, 100);
+        Mesh mesh = vol.GetComponent<MeshFilter>().sharedMesh;
+
+        Debug.Log("mesh size " + mesh.bounds.size);
+
         this.generator = new SpaceColonization(this.leaf_kill_distance, 
                                                this.leaf_influence_radius, 
-                                               this.influence_points);
+                                               this.influence_points,
+                                               mesh);
 
         this.view = new SpaceColonizationView();
 
         this.generator.start();
         this.view.update(this.generator.GetLeaves());
-        //this.view.update(this.generator.GetNodes());
+        this.view.update(this.generator.GetNodes());
     }
 
 
@@ -39,7 +48,7 @@ public class SpaceColonizationGen : MonoBehaviour
                 this.GenerateAndDrop();
             }
 
-            //this.view.update(this.generator.GetNodes());
+            this.view.update(this.generator.GetNodes());
 
             Debug.Log("Done @ " + generator.steps + " steps");
         }
@@ -57,14 +66,15 @@ public class SpaceColonizationGen : MonoBehaviour
 
     public void GenerateAndShow()
     {
-        (List<Leaf>, List<Node>) gen = this.generator.Generate();
+        (List<Leaf>, List<Node>) gen = this.generator.Grow();
         this.view.DropLeaves(gen.Item1);
-        //this.view.update(gen.Item2);
+        this.view.update(gen.Item2);
     }
 
     private void GenerateAndDrop()
     {
-        (List<Leaf>, List<Node>) gen = this.generator.Generate();
+        (List<Leaf>, List<Node>) gen = this.generator.Grow();
         this.view.DropLeaves(gen.Item1);
+        //this.view.update(this.generator.GetNodes());
     }
 }

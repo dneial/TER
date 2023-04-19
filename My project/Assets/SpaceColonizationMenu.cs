@@ -50,13 +50,8 @@ public class SpaceColonizationMenu : EditorWindow
             generator = new SpaceColonization(leaf_kill_distance, leaf_influence_radius, influence_points);
             view = new SpaceColonizationView();
 
-            this.generator.start();
-
-            while(!generator.done) {
-                (List<Leaf>, List<Node>) gen = this.generator.Generate();
-            }
+            generator.Generate();
             
-            generator.NormalizeThickness();
             this.view.update(this.generator.GetNodes(), thickness);
         }
 

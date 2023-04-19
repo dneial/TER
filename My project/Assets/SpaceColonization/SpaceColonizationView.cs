@@ -19,7 +19,7 @@ public class SpaceColonizationView {
         this.PlaceLeaves(leaves);
     }
 
-    public void update(List<Node> nodes, AnimationCurve thickness)
+    public void update(List<Node> nodes, AnimationCurve thickness = null)
     {
         this.LinkNodes(nodes, thickness);
     }
@@ -38,16 +38,21 @@ public class SpaceColonizationView {
     }
 
 
-    public void LinkNodes(List<Node> nodes, AnimationCurve thickness) 
+    public void LinkNodes(List<Node> nodes, AnimationCurve thickness = null) 
     {
         foreach(Node node in nodes){
             if(node.parent != null){
                 GameObject capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 capsule.name = "Node(" + node.parent.id + ", " + node.id + ")";
                 capsule.transform.position = (node.position + node.parent.position) / 2f;
-                Debug.Log(node.thickness);
-                var actualThickness = thickness.Evaluate(node.thickness);
+
+                var actualThickness = 1f;
+                if(thickness != null)
+                {
+                    actualThickness = thickness.Evaluate(node.thickness);
+                }
                 capsule.transform.localScale = new Vector3(actualThickness, (actualThickness+Vector3.Distance(node.position, node.parent.position))/2, actualThickness);
+                
                 capsule.transform.parent = this.root.transform;
                 capsule.transform.LookAt(node.position);
                 capsule.transform.Rotate(Vector3.right, 90);
@@ -59,7 +64,7 @@ public class SpaceColonizationView {
     public void DropLeaves(List<Leaf> leaves)
     {
         foreach(Leaf leaf in leaves){
-            UnityEngine.Object.DestroyImmediate(this.leaves[leaf]);
+            if(this.leaves.ContainsKey(leaf)) UnityEngine.Object.DestroyImmediate(this.leaves[leaf]);
         }
     }
 }
