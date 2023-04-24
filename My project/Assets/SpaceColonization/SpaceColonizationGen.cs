@@ -15,18 +15,24 @@ public class SpaceColonizationGen : MonoBehaviour
     [Range(50, 1000)]
     public int influence_points = 100;
 
-    
+    public GameObject prefab;
+
     SpaceColonization generator;
     SpaceColonizationView view;
 
     public void Start()
     {
-        GameObject vol = AssetDatabase.LoadAssetAtPath("Assets/Blender_msh/Vol.prefab", typeof(GameObject)) as GameObject;
-        
-        vol.transform.localScale = new Vector3(100, 100, 100);
-        Mesh mesh = vol.GetComponent<MeshFilter>().sharedMesh;
 
-        Debug.Log("mesh size " + mesh.bounds.size);
+        Instantiate(prefab, new Vector3(0, 10, 0), Quaternion.Euler(-90, 0, 0));
+
+        Debug.Log("pos : " + prefab.transform.position);
+        Mesh mesh = prefab.GetComponent<MeshFilter>().sharedMesh;
+
+        Debug.Log("vertice: " + mesh.vertices[0]);
+
+        mesh.bounds = new Bounds(new Vector3(0, 10, 0), new Vector3(10, 10, 10));
+        MeshCollider collider = prefab.GetComponent<MeshCollider>();
+
 
         this.generator = new SpaceColonization(this.leaf_kill_distance, 
                                                this.leaf_influence_radius, 

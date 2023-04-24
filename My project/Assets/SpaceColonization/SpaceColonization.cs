@@ -88,7 +88,7 @@ public class SpaceColonization
 
         // Vector3[] points = this.PlacePointsWithinVolume(nbPoints, this.volume);
 
-        Vector3[] points = this.PPWV(nbPoints);
+        Vector3[] points = this.PlacePointsInMesh(nbPoints);
 
 
         for (int i = 0; i < nbPoints; i++) {
@@ -262,7 +262,7 @@ public class SpaceColonization
         return points;
     }
 
-    private Vector3[] PPWV(int nb_points)
+    private Vector3[] PlacePointsInMesh(int nb_points)
     {
 
         Mesh mesh = this.vol;
@@ -285,8 +285,45 @@ public class SpaceColonization
             points[i] = randomPoint;
         }
 
+
+
+        //points = this.TestPoints(points);
+
         return points;
     }
+
+
+    private Vector3[] TestPoints(Vector3[] points)
+    {
+        int layerMask = 1 << 8;
+        layerMask = ~layerMask;
+
+
+        Vector3[] newPoints = new Vector3[points.Length];
+
+        foreach(Vector3 p in points)
+        {
+            RaycastHit[] hits = Physics.RaycastAll(p, Vector3.up, 100.0f);
+
+            int collisions = 0;
+
+            foreach(RaycastHit hit in hits)
+            {
+                Debug.Log("hit: " + hit.collider.gameObject.name);
+                collisions++;
+            }
+            
+
+            if(collisions%2 != 0)
+            {
+                Debug.Log("inside");
+            }
+        }
+
+        return points;
+    }
+
+
 
     public List<Node> GetNodes() {
         return this.nodes;
