@@ -47,7 +47,7 @@ public class SpaceColonizationMenu : EditorWindow
       
         if(GUILayout.Button("Generate"))
         {
-            generator = new SpaceColonization(leaf_kill_distance, leaf_influence_radius, influence_points);
+            generator = new SpaceColonization(new Bounds(new Vector3(0, 0, 0), new Vector3(5, 5, 5)), leaf_kill_distance, leaf_influence_radius, influence_points);
             view = new SpaceColonizationView();
 
             generator.Generate();

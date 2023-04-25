@@ -15,6 +15,9 @@ public class SpaceColonizationGen : MonoBehaviour
     [Range(50, 1000)]
     public int influence_points = 100;
 
+    [Range(0.1f, 10f)]
+    public float height = 10f;
+
     public GameObject prefab;
 
     SpaceColonization generator;
@@ -23,21 +26,14 @@ public class SpaceColonizationGen : MonoBehaviour
     public void Start()
     {
 
-        Instantiate(prefab, new Vector3(0, 10, 0), Quaternion.Euler(-90, 0, 0));
+        GameObject go = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
 
-        Debug.Log("pos : " + prefab.transform.position);
-        Mesh mesh = prefab.GetComponent<MeshFilter>().sharedMesh;
+        Bounds bounds = go.GetComponent<MeshCollider>().bounds;
 
-        Debug.Log("vertice: " + mesh.vertices[0]);
-
-        mesh.bounds = new Bounds(new Vector3(0, 10, 0), new Vector3(10, 10, 10));
-        MeshCollider collider = prefab.GetComponent<MeshCollider>();
-
-
-        this.generator = new SpaceColonization(this.leaf_kill_distance, 
+        this.generator = new SpaceColonization(bounds,
+                                               this.leaf_kill_distance, 
                                                this.leaf_influence_radius, 
-                                               this.influence_points,
-                                               mesh);
+                                               this.influence_points);
 
         this.view = new SpaceColonizationView();
 

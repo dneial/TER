@@ -21,17 +21,17 @@ public class SpaceColonization
 
     private CrownVolume volume;
 
-    private Mesh vol;
+    private Bounds vol;
 
 
     public bool done { get; set; } = false;
     public int steps { get; set; } = 0;
 
     public SpaceColonization(
+        Bounds vol,
         float leaf_kill_distance = 1f, 
         float leaf_influence_radius = 9f, 
-        int nb_points = 100,
-        Mesh vol = null
+        int nb_points = 100
         )
     {
         
@@ -43,8 +43,6 @@ public class SpaceColonization
 
         this.vol = vol;
         
-        this.GenerateVolume(32, 15f, 10f);
-
     }
 
     public void start(){
@@ -63,35 +61,15 @@ public class SpaceColonization
     }
 
 
-
-
-    private void GenerateVolume(int nb_points, float radius, float height) {
-        // Mesh mesh = CrownVolume.GetConeMesh(nb_points, radius, height);
-        // GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        // go.GetComponent<MeshFilter>().mesh = mesh;
-
-        // Vector3[] points = this.PPWV(mesh);
-
-        // foreach(Vector3 point in points) {
-        //     GameObject obj = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        //     obj.transform.position = point;
-        // }
-
-
-        this.volume = CrownVolume.GetCone(nb_points, nb_points/1.4f, nb_points/1.2f);
-    }
-
     // place x number of points around the center
     private List<Leaf> PlaceLeaves(int nbPoints) {
 
         List<Leaf> leaves = new List<Leaf>();
 
-        // Vector3[] points = this.PlacePointsWithinVolume(nbPoints, this.volume);
-
-        Vector3[] points = this.PlacePointsInMesh(nbPoints);
+        Vector3[] points = this.PlacePoints(nbPoints);
 
 
-        for (int i = 0; i < nbPoints; i++) {
+        for (int i = 0; i < points.Length; i++) {
             // random between 0 and 1 and test if greater than 0.5
             // bool repulse = Random.value > 0.75f;
             Vector3 position = points[i];
@@ -236,48 +214,31 @@ public class SpaceColonization
     }
 
 
-    // Generate random points within the given volume
-    private Vector3[] PlacePointsWithinVolume(int nbPoints, CrownVolume volume)
+   private Vector3[] PlacePoints(int nb_points)
     {
+        List<Vector3> points = new List<Vector3>();
 
-        Vector3[] points = new Vector3[nbPoints];
+        points.AddRange(this.PlacePointsInMesh(nb_points));
 
-        for (int i = 0; i < nbPoints; i++)
+        while(points.Count < nb_points)
         {
-            // Generate a random point on the surface of the volume
-            Vector3 randomPoint = Vector3.zero;
-            int randomIndex = Random.Range(0, volume.segments);
-            randomPoint.x = volume.vertices[randomIndex + 1].x;
-            randomPoint.z = volume.vertices[randomIndex + 1].z;
-            randomPoint.y = Random.Range(volume.height/2f, volume.height);
-
-            // Project the random point onto the inside of the volume
-            float t = 1f - Mathf.Abs(randomPoint.y / volume.height);
-            randomPoint.x *= t;
-            randomPoint.z *= t;
-
-            points[i] = randomPoint;
+            points.AddRange(this.PlacePointsInMesh(nb_points - points.Count));
         }
 
-        return points;
+        return points.ToArray();
     }
 
     private Vector3[] PlacePointsInMesh(int nb_points)
     {
 
-        Mesh mesh = this.vol;
         Vector3[] points = new Vector3[nb_points];
 
-        Vector3 min = mesh.bounds.min;
-        Vector3 max = mesh.bounds.max;
-
-        Debug.Log("min: " + min);
-        Debug.Log("max: " + max);
-
+        Vector3 min = this.vol.min;
+        Vector3 max = this.vol.max;
 
         for (int i = 0; i < nb_points; i++)
         {
-            Vector3 randomPoint = Vector3.zero;
+            Vector3 randomPoint = this.vol.center;
             randomPoint.x = Random.Range(min.x, max.x);
             randomPoint.y = Random.Range(min.y, max.y);
             randomPoint.z = Random.Range(min.z, max.z);
@@ -286,8 +247,7 @@ public class SpaceColonization
         }
 
 
-
-        //points = this.TestPoints(points);
+        points = this.TestPoints(points);
 
         return points;
     }
@@ -295,34 +255,56 @@ public class SpaceColonization
 
     private Vector3[] TestPoints(Vector3[] points)
     {
-        int layerMask = 1 << 8;
-        layerMask = ~layerMask;
 
-
-        Vector3[] newPoints = new Vector3[points.Length];
+        List<Vector3> newPoints = new List<Vector3>();
 
         foreach(Vector3 p in points)
         {
-            RaycastHit[] hits = Physics.RaycastAll(p, Vector3.up, 100.0f);
+            Vector3 depart = p;
+            RaycastHit[] hits;
+            RaycastHit hit;
+            Vector3[] directions = 
+            new Vector3[] { 
+                Vector3.right, 
+                Vector3.forward, 
+                Vector3.left, 
+                Vector3.back,
+                Vector3.down,
+                new Vector3(1, 1, 0),
+                new Vector3(1, 1, 1),
+                new Vector3(1, 1, -1),
+                new Vector3(1, -1, 0),
+                new Vector3(1, -1, 1),
+                new Vector3(1, -1, -1),
+                new Vector3(-1, 1, 0),
+                new Vector3(-1, 1, 1),
+                new Vector3(-1, 1, -1),
+                new Vector3(-1, -1, 0),
+                new Vector3(-1, -1, 1),
+                new Vector3(-1, -1, -1)
+            };
+
 
             int collisions = 0;
 
-            foreach(RaycastHit hit in hits)
+            foreach(Vector3 dir in directions)
             {
-                Debug.Log("hit: " + hit.collider.gameObject.name);
-                collisions++;
+                hits = Physics.RaycastAll(depart, dir, 100.0f);
+                if(hits.Length > 0)
+                {
+                    collisions++;
+                    break;
+                }
             }
-            
 
-            if(collisions%2 != 0)
+            if(collisions == 0)
             {
-                Debug.Log("inside");
+                newPoints.Add(p);
             }
         }
 
-        return points;
+        return newPoints.ToArray();
     }
-
 
 
     public List<Node> GetNodes() {
