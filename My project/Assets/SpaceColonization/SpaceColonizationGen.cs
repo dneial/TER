@@ -28,7 +28,20 @@ public class SpaceColonizationGen : MonoBehaviour
 
         GameObject go = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
 
+
         Bounds bounds = go.GetComponent<MeshCollider>().bounds;
+
+        // scale up in function on number of points
+        Vector3 size = go.transform.localScale;
+        float scale = Mathf.Sqrt(influence_points) / 10f;
+
+
+        Debug.Log("scale for " + influence_points + "points : " + scale);
+        go.transform.localScale = size * scale;
+
+        bounds.size *= scale;
+
+
 
         this.generator = new SpaceColonization(bounds,
                                                this.leaf_kill_distance, 

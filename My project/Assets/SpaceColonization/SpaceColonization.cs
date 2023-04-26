@@ -11,8 +11,6 @@ public class SpaceColonization
     private float leaf_influence_radius;
     private int influence_points;
 
-    private float radius = 10f;
-
     private List<Leaf> leaves { get; set; } = new List<Leaf>();
 
     private List<Node> nodes = new List<Node>();
@@ -42,7 +40,6 @@ public class SpaceColonization
         this.nodes.Add(this.root_node);
 
         this.vol = vol;
-        
     }
 
     public void start(){
@@ -51,15 +48,32 @@ public class SpaceColonization
     }
     
 
-    public void Generate()
+    public void Generate(int max_iterations)
     {
         this.start();
-        while(!this.done) {
+        while(!this.done && this.steps < max_iterations) {
+            this.leaves.AddRange(this.PlaceLeaves(5));
             this.Grow();
         }
         this.NormalizeThickness();
     }
 
+
+/*
+
+    public IEnumerable<List<Leaf>> Generate(int max_iterations)
+    {
+        this.start();
+        while(!this.done && this.steps < max_iterations) {
+            this.Grow();
+            List<Leaf> newLeaves = this.PlaceLeaves(5); 
+            this.leaves.AddRange(newLeaves);
+            yield return newLeaves;
+        }
+        this.NormalizeThickness();
+    }
+
+*/
 
     // place x number of points around the center
     private List<Leaf> PlaceLeaves(int nbPoints) {
@@ -262,7 +276,7 @@ public class SpaceColonization
         {
             Vector3 depart = p;
             RaycastHit[] hits;
-            RaycastHit hit;
+
             Vector3[] directions = 
             new Vector3[] { 
                 Vector3.right, 

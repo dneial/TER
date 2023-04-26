@@ -19,6 +19,10 @@ public class SpaceColonizationMenu : EditorWindow
     static float leaf_kill_distance = 1f;
     static int influence_points = 100;
     static AnimationCurve thickness = AnimationCurve.EaseInOut(0,0.35f,1,1);
+    static GameObject prefab;
+    static float height = 10f;
+    static int max_iterations = 1000;
+    static int new_leaves = 5;
 
     private SpaceColonization generator;
     private SpaceColonizationView view;
@@ -38,6 +42,18 @@ public class SpaceColonizationMenu : EditorWindow
         GUILayout.Label("Influence Points");
         influence_points = EditorGUILayout.IntSlider(influence_points, 50, 1000);
 
+        GUILayout.Label("Volume Prefab");
+        prefab = EditorGUILayout.ObjectField(prefab, typeof(GameObject), true) as GameObject;
+
+        GUILayout.Label("Volume Height");
+        height = EditorGUILayout.Slider(height, 0.1f, 10);
+
+        GUILayout.Label("Max Iterations");
+        max_iterations = EditorGUILayout.IntSlider(max_iterations, 1, 1000);
+
+        GUIContent content = new GUIContent("New Leaves", "Number of new leaves to add each iteration");
+        new_leaves = EditorGUILayout.IntSlider(content, new_leaves, 0, 100);
+
         thickness.AddKey(0.4f, 0.9f);
         thickness.AddKey(0.3f, 0.8f);
         thickness.AddKey(0.95f, 1);
@@ -47,12 +63,24 @@ public class SpaceColonizationMenu : EditorWindow
       
         if(GUILayout.Button("Generate"))
         {
-            generator = new SpaceColonization(new Bounds(new Vector3(0, 0, 0), new Vector3(5, 5, 5)), leaf_kill_distance, leaf_influence_radius, influence_points);
+            if(prefab == null)
+            {
+                prefab = AssetDatabase.LoadAssetAtPath("Assets/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
+            }
+
+            GameObject go = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
+            Bounds bounds = go.GetComponent<MeshCollider>().bounds;
+            
+            generator = new SpaceColonization(bounds, leaf_kill_distance, leaf_influence_radius, influence_points);
             view = new SpaceColonizationView();
 
-            generator.Generate();
-            
+            DestroyImmediate(go);
+
+            generator.Generate(max_iterations);
             this.view.update(this.generator.GetNodes(), thickness);
+            
+            Debug.Log("Generated after " + generator.steps + " steps");
+            
         }
 
     }

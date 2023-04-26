@@ -45,14 +45,13 @@ public class SpaceColonizationView {
                 GameObject capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
                 capsule.name = "Node(" + node.parent.id + ", " + node.id + ")";
                 capsule.transform.position = (node.position + node.parent.position) / 2f;
-                Debug.Log(node.thickness);
-                float actualThickness = thickness.Evaluate(node.thickness);
-                capsule.transform.localScale = new Vector3(actualThickness, (actualThickness+Vector3.Distance(node.position, node.parent.position))/2, actualThickness);
-                if(node.parent != null){
-                    MajVerticesCapsule(capsule, actualThickness,thickness.Evaluate(node.parent.thickness));
-                } else {
-                    MajVerticesCapsule(capsule, actualThickness,1);
+
+                if(thickness != null) 
+                {
+                    float actualThickness = thickness.Evaluate(node.thickness);
+                    capsule.transform.localScale = new Vector3(actualThickness, (actualThickness+Vector3.Distance(node.position, node.parent.position))/2, actualThickness);
                 }
+
                 capsule.transform.parent = this.root.transform;
                 capsule.transform.LookAt(node.position);
                 capsule.transform.Rotate(Vector3.right, 90);
@@ -80,5 +79,10 @@ public class SpaceColonizationView {
         foreach(Leaf leaf in leaves){
             if(this.leaves.ContainsKey(leaf)) UnityEngine.Object.DestroyImmediate(this.leaves[leaf]);
         }
+    }
+
+    public GameObject GetRoot()
+    {
+        return this.root;
     }
 }
