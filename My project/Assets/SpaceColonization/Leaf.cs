@@ -8,6 +8,7 @@ public class Leaf {
     public Vector3 position { get; }
     public float kill_distance { get; set; }
     public float influence_radius {get; set; }
+    public bool inversed { get; set; } = false;
     public bool reached { get; set; } = false;
 
     public Leaf(long id, Vector3 position, float kill_distance = 1f, float influence_radius = 9f) {

@@ -21,14 +21,18 @@ public class SpaceColonization
 
     private CrownVolume volume;
 
+    private Bounds vol;
+
 
     public bool done { get; set; } = false;
     public int steps { get; set; } = 0;
 
     public SpaceColonization(
+        Bounds vol,
         float leaf_kill_distance = 1f, 
         float leaf_influence_radius = 9f, 
-        int nb_points = 100)
+        int nb_points = 100
+        )
     {
         
         this.leaf_kill_distance = leaf_kill_distance;
@@ -36,9 +40,9 @@ public class SpaceColonization
         this.influence_points = nb_points;
 
         this.nodes.Add(this.root_node);
-        
-        this.GenerateVolume(32, 15f, 10f);
 
+        this.vol = vol;
+        
     }
 
     public void start(){
@@ -46,21 +50,31 @@ public class SpaceColonization
         this.GenerateRoot();
     }
     
-    private void GenerateVolume(int nb_points, float radius, float height) {
-        this.volume = CrownVolume.GetCone(nb_points, radius, height);
+
+    public void Generate()
+    {
+        this.start();
+        while(!this.done) {
+            this.Grow();
+        }
+        this.NormalizeThickness();
     }
+
 
     // place x number of points around the center
     private List<Leaf> PlaceLeaves(int nbPoints) {
 
         List<Leaf> leaves = new List<Leaf>();
 
-        Vector3[] points = this.PlacePointsWithinVolume(nbPoints, this.volume);
+        Vector3[] points = this.PlacePoints(nbPoints);
 
 
-        for (int i = 0; i < nbPoints; i++) {
+        for (int i = 0; i < points.Length; i++) {
+            // random between 0 and 1 and test if greater than 0.5
+            // bool repulse = Random.value > 0.75f;
             Vector3 position = points[i];
             Leaf leaf = new Leaf(i, position, this.leaf_kill_distance, this.leaf_influence_radius);
+            // leaf.inversed = repulse;
             leaves.Add(leaf);
         }
 
@@ -74,7 +88,7 @@ public class SpaceColonization
         return direction;
     }
 
-    public (List<Leaf>, List<Node>) Generate() 
+    public (List<Leaf>, List<Node>) Grow() 
     {
         this.AttractNodes();
         List<Leaf> dropped_leaves = this.DropLeaves();
@@ -96,7 +110,10 @@ public class SpaceColonization
             leaf = this.leaves[i];
             closest = leaf.FindClosestNode(this.nodes);
             if (closest != null) {
-                closest.direction += this.GetDirection(closest.position, leaf.position);
+                if(leaf.inversed)
+                    closest.direction -= this.GetDirection(closest.position, leaf.position);
+                else
+                    closest.direction += this.GetDirection(closest.position, leaf.position);
                 closest.influences++;
                 closest.isInfluenced = true;
             }
@@ -197,31 +214,98 @@ public class SpaceColonization
     }
 
 
-    // Generate random points within the given volume
-    private Vector3[] PlacePointsWithinVolume(int nbPoints, CrownVolume volume)
+   private Vector3[] PlacePoints(int nb_points)
+    {
+        List<Vector3> points = new List<Vector3>();
+
+        points.AddRange(this.PlacePointsInMesh(nb_points));
+
+        while(points.Count < nb_points)
+        {
+            points.AddRange(this.PlacePointsInMesh(nb_points - points.Count));
+        }
+
+        return points.ToArray();
+    }
+
+    private Vector3[] PlacePointsInMesh(int nb_points)
     {
 
-        Vector3[] points = new Vector3[nbPoints];
+        Vector3[] points = new Vector3[nb_points];
 
-        for (int i = 0; i < nbPoints; i++)
+        Vector3 min = this.vol.min;
+        Vector3 max = this.vol.max;
+
+        for (int i = 0; i < nb_points; i++)
         {
-            // Generate a random point on the surface of the volume
-            Vector3 randomPoint = Vector3.zero;
-            int randomIndex = Random.Range(0, volume.segments);
-            randomPoint.x = volume.vertices[randomIndex + 1].x;
-            randomPoint.z = volume.vertices[randomIndex + 1].z;
-            randomPoint.y = Random.Range(volume.height/2f, volume.height);
-
-            // Project the random point onto the inside of the volume
-            float t = 1f - Mathf.Abs(randomPoint.y / volume.height);
-            randomPoint.x *= t;
-            randomPoint.z *= t;
+            Vector3 randomPoint = this.vol.center;
+            randomPoint.x = Random.Range(min.x, max.x);
+            randomPoint.y = Random.Range(min.y, max.y);
+            randomPoint.z = Random.Range(min.z, max.z);
 
             points[i] = randomPoint;
         }
 
+
+        points = this.TestPoints(points);
+
         return points;
     }
+
+
+    private Vector3[] TestPoints(Vector3[] points)
+    {
+
+        List<Vector3> newPoints = new List<Vector3>();
+
+        foreach(Vector3 p in points)
+        {
+            Vector3 depart = p;
+            RaycastHit[] hits;
+            RaycastHit hit;
+            Vector3[] directions = 
+            new Vector3[] { 
+                Vector3.right, 
+                Vector3.forward, 
+                Vector3.left, 
+                Vector3.back,
+                Vector3.down,
+                new Vector3(1, 1, 0),
+                new Vector3(1, 1, 1),
+                new Vector3(1, 1, -1),
+                new Vector3(1, -1, 0),
+                new Vector3(1, -1, 1),
+                new Vector3(1, -1, -1),
+                new Vector3(-1, 1, 0),
+                new Vector3(-1, 1, 1),
+                new Vector3(-1, 1, -1),
+                new Vector3(-1, -1, 0),
+                new Vector3(-1, -1, 1),
+                new Vector3(-1, -1, -1)
+            };
+
+
+            int collisions = 0;
+
+            foreach(Vector3 dir in directions)
+            {
+                hits = Physics.RaycastAll(depart, dir, 100.0f);
+                if(hits.Length > 0)
+                {
+                    collisions++;
+                    break;
+                }
+            }
+
+            if(collisions == 0)
+            {
+                newPoints.Add(p);
+            }
+        }
+
+        return newPoints.ToArray();
+    }
+
 
     public List<Node> GetNodes() {
         return this.nodes;

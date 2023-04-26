@@ -15,12 +15,23 @@ public class SpaceColonizationGen : MonoBehaviour
     [Range(50, 1000)]
     public int influence_points = 100;
 
+    [Range(0.1f, 10f)]
+    public float height = 10f;
+
+    public GameObject prefab;
+
     SpaceColonization generator;
     SpaceColonizationView view;
 
     public void Start()
     {
-        this.generator = new SpaceColonization(this.leaf_kill_distance, 
+
+        GameObject go = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
+
+        Bounds bounds = go.GetComponent<MeshCollider>().bounds;
+
+        this.generator = new SpaceColonization(bounds,
+                                               this.leaf_kill_distance, 
                                                this.leaf_influence_radius, 
                                                this.influence_points);
 
@@ -28,7 +39,7 @@ public class SpaceColonizationGen : MonoBehaviour
 
         this.generator.start();
         this.view.update(this.generator.GetLeaves());
-        //this.view.update(this.generator.GetNodes());
+        this.view.update(this.generator.GetNodes());
     }
 
 
@@ -39,7 +50,7 @@ public class SpaceColonizationGen : MonoBehaviour
                 this.GenerateAndDrop();
             }
 
-            //this.view.update(this.generator.GetNodes());
+            this.view.update(this.generator.GetNodes());
 
             Debug.Log("Done @ " + generator.steps + " steps");
         }
@@ -57,14 +68,15 @@ public class SpaceColonizationGen : MonoBehaviour
 
     public void GenerateAndShow()
     {
-        (List<Leaf>, List<Node>) gen = this.generator.Generate();
+        (List<Leaf>, List<Node>) gen = this.generator.Grow();
         this.view.DropLeaves(gen.Item1);
-        //this.view.update(gen.Item2);
+        this.view.update(gen.Item2);
     }
 
     private void GenerateAndDrop()
     {
-        (List<Leaf>, List<Node>) gen = this.generator.Generate();
+        (List<Leaf>, List<Node>) gen = this.generator.Grow();
         this.view.DropLeaves(gen.Item1);
+        //this.view.update(this.generator.GetNodes());
     }
 }

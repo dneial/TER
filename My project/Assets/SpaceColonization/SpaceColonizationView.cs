@@ -19,7 +19,7 @@ public class SpaceColonizationView {
         this.PlaceLeaves(leaves);
     }
 
-    public void update(List<Node> nodes, AnimationCurve thickness)
+    public void update(List<Node> nodes, AnimationCurve thickness = null)
     {
         this.LinkNodes(nodes, thickness);
     }
@@ -38,7 +38,7 @@ public class SpaceColonizationView {
     }
 
 
-    public void LinkNodes(List<Node> nodes, AnimationCurve thickness) 
+    public void LinkNodes(List<Node> nodes, AnimationCurve thickness = null) 
     {
         foreach(Node node in nodes){
             if(node.parent != null){
@@ -78,7 +78,7 @@ public class SpaceColonizationView {
     public void DropLeaves(List<Leaf> leaves)
     {
         foreach(Leaf leaf in leaves){
-            UnityEngine.Object.DestroyImmediate(this.leaves[leaf]);
+            if(this.leaves.ContainsKey(leaf)) UnityEngine.Object.DestroyImmediate(this.leaves[leaf]);
         }
     }
 }
