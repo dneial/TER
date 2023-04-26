@@ -13,6 +13,13 @@ public class TestTerrain : EditorWindow
 
     static int nbCoraux = 1;
     static AnimationCurve probaHeight;
+    static AnimationCurve thickness = AnimationCurve.EaseInOut(0,0.35f,1,1);
+    static GameObject prefab;
+    static float height = 10f;
+    static int max_iterations = 1000;
+    static float leaf_influence_radius = 1f;
+    static float leaf_kill_distance = 1f;
+    static int influence_points = 100;
 
     void OnGUI() {
         Terrain terrain = Terrain.activeTerrain;
@@ -22,7 +29,31 @@ public class TestTerrain : EditorWindow
         probaHeight = EditorGUILayout.CurveField("Apparition", probaHeight);
 
         GUILayout.Label("Nombre de generation");
-        nbCoraux = EditorGUILayout.IntSlider(nbCoraux, 50, 1000);
+        nbCoraux = EditorGUILayout.IntSlider(nbCoraux, 1, 1000);
+
+        GUILayout.Label("Leaf Influence Radius");
+        leaf_influence_radius = EditorGUILayout.Slider(leaf_influence_radius, 10, 100);
+
+        GUILayout.Label("Leaf Kill Distance");
+        leaf_kill_distance = EditorGUILayout.Slider(leaf_kill_distance, 1, 10);
+
+        GUILayout.Label("Influence Points");
+        influence_points = EditorGUILayout.IntSlider(influence_points, 50, 1000);
+
+        GUILayout.Label("Volume Prefab");
+        prefab = EditorGUILayout.ObjectField(prefab, typeof(GameObject), true) as GameObject;
+
+        GUILayout.Label("Volume Height");
+        height = EditorGUILayout.Slider(height, 0.1f, 10);
+
+        GUILayout.Label("Max Iterations");
+        max_iterations = EditorGUILayout.IntSlider(max_iterations, 1, 1000);
+
+        thickness.AddKey(0.4f, 0.9f);
+        thickness.AddKey(0.3f, 0.8f);
+        thickness.AddKey(0.95f, 1);
+        thickness.SmoothTangents(3, -1);
+        thickness = EditorGUILayout.CurveField("Thickness", thickness);
 
         if(GUILayout.Button("RandomGeneration")) {
             RandomGeneration();
@@ -40,16 +71,18 @@ public class TestTerrain : EditorWindow
         GameObject gen = new GameObject();
 
         int cpt = 0;
-        while(cpt <= nbCoraux){
+        while(cpt < nbCoraux){
             float x = Random.Range(posTerrain.x, posTerrain.x+td.size.x);
             float z = Random.Range(posTerrain.z, posTerrain.z+td.size.z);
             float y = Terrain.activeTerrain.SampleHeight(new Vector3(x,0,z)) + Terrain.activeTerrain.transform.position.y;
             if(Random.Range(0f, 1f) < probaHeight.Evaluate(y)) {
                 cpt++;
-                GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                /*GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
                 sphere.GetComponent<MeshRenderer>().material.SetColor("_Color", Color.red);
-                sphere.transform.localPosition = new Vector3(x, y, z);
-                sphere.transform.parent = gen.transform;
+                sphere.transform.localPosition = new Vector3(x, y, z);*/
+                GameObject coral = CreateCoral();
+                coral.transform.parent = gen.transform;
+                coral.transform.localPosition = new Vector3(x, y, z);
             }
         }
     }
@@ -62,15 +95,37 @@ public class TestTerrain : EditorWindow
         GameObject gen = new GameObject();
 
         int cpt = 0;
-        while(cpt <= nbCoraux){
+        while(cpt < nbCoraux){
             float x = Random.Range(posTerrain.x, posTerrain.x+td.size.x);
             float z = Random.Range(posTerrain.z, posTerrain.z+td.size.z);
             float y = Terrain.activeTerrain.SampleHeight(new Vector3(x,0,z)) + Terrain.activeTerrain.transform.position.y;
-            GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            /*GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             sphere.GetComponent<MeshRenderer>().material.SetColor("_Color", Color.red);
-            sphere.transform.localPosition = new Vector3(x, y, z);
-            sphere.transform.parent = gen.transform;
+            sphere.transform.localPosition = new Vector3(x, y, z);*/
+            GameObject coral = CreateCoral();
+            coral.transform.parent = gen.transform;
+            coral.transform.localPosition = new Vector3(x, y, z);
             cpt++;
         }
+    }
+
+    GameObject CreateCoral(){
+        if(prefab == null)
+            {
+                prefab = AssetDatabase.LoadAssetAtPath("Assets/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
+            }
+
+            GameObject go = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
+            Bounds bounds = go.GetComponent<MeshCollider>().bounds;
+            
+            SpaceColonization generator = new SpaceColonization(bounds, leaf_kill_distance, leaf_influence_radius, influence_points);
+            SpaceColonizationView view = new SpaceColonizationView();
+
+            DestroyImmediate(go);
+
+            generator.Generate(max_iterations);
+            view.update(generator.GetNodes(), thickness);
+
+            return view.GetRoot();
     }
 }
