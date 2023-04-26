@@ -8,7 +8,7 @@ public class LSystemGen2
     public Lsystem lsystem;
     public GameObject parent;
     public int nbBranches = 0;
-    public List<BrancheV2> branches;
+    public List<INode> branches;
     public Stack<BrancheV2> stackBranches;
     public Stack<BrancheV2> stackNodes;
     public Stack<BranchState> stateStack;
@@ -18,7 +18,7 @@ public class LSystemGen2
         this.lsystem = lsystem;
         this.parent = parent;
 
-        this.branches = new List<BrancheV2>();
+        this.branches = new List<INode>();
         this.stackBranches = new Stack<BrancheV2>();
         this.stackNodes = new Stack<BrancheV2>();
         this.stateStack = new Stack<BranchState>();
@@ -50,7 +50,7 @@ public class LSystemGen2
     // 2 : r(180,180) F0.5 h20 F(12,2.0) R5 [ C ] B
     // 3 : r(180,180) F0.5 h20 F(12,2.0) R5 [ h-40 F(12,2.0) R5 [ D ] B ] F(5,1.0) R4.5
 
-    public void ParseAndPlace(string current)
+    public List<INode> ParseAndPlace(string current, bool displayOn)
     {
         //lit la chaine de caractère et construit les branches en fonction des règles de production
 
@@ -115,9 +115,13 @@ public class LSystemGen2
                     b = new BrancheV2(++nbBranches, stackBranches.Peek());
                 }
 
-                b.addGameObject(parent);
                 b.setState(new BranchState(currentState));
                 calculatePosition(b);
+
+                if(displayOn)
+                {
+                    displayBranch(b, parent);
+                }
 
                 //add the branch to the list
                 branches.Add(b);
@@ -168,12 +172,12 @@ public class LSystemGen2
             }
 
             //si le mot est le dernier de la chaine ou ']', on arrondit le bout de la branche
-            if (word != "" && (word == words[words.Length - 1] || word[0] == ']'))
+            if (displayOn && word != "" && (word == words[words.Length - 1] || word[0] == ']'))
             {
                 //dernière branche créée :
                 BrancheV2 tmp = stackBranches.Peek();
-                Vector3 pos = tmp.gameobject.transform.position;
-                Vector3 rota = tmp.gameobject.transform.rotation.eulerAngles;
+                Vector3 pos = tmp.getGPosition();
+                Vector3 rota = tmp.getGRotation();
 
                 //son extremité
                 Vector3 branchEnd = pos + Quaternion.Euler(rota.x, rota.y, rota.z) *
@@ -190,13 +194,16 @@ public class LSystemGen2
         stackBranches.Clear();
         stackNodes.Clear();
         stateStack.Clear();
+
+        //return the list of branches
+        return branches;
     }
 
     //fonction qui calcule la position et place la branche par rapport à son parent
-    private void calculatePosition(BrancheV2 b)
+    public void calculatePosition(BrancheV2 b)
     {
         //get the parent of b
-        BrancheV2 parent = b.parent;
+        BrancheV2 parent = (BrancheV2) b.parent;
 
         //bunch of variables
         Vector3 parentPos, parentRot, parentExtremity, newPos;
@@ -206,10 +213,10 @@ public class LSystemGen2
         if (parent != null)
         {
             //get the parent position
-            parentPos = parent.gameobject.transform.position;
+            parentPos = parent.position;
 
             //get the parent rotation
-            parentRot = parent.gameobject.transform.rotation.eulerAngles;
+            parentRot = parent.rotation;
 
             //get the parent extremity
             parentExtremity = parentPos + Quaternion.Euler(parentRot.x, parentRot.y, parentRot.z) *
@@ -217,7 +224,7 @@ public class LSystemGen2
                                         (parent.branchState.step/2);
             
             //little debugging spheres to see the parent's extremity
-            placeSphere(parent, parentExtremity, parentRot);
+            // placeSphere(parent, parentExtremity, parentRot);
         } 
     
         //calculate the new position of the child branch
@@ -227,16 +234,20 @@ public class LSystemGen2
         b.setPosition(newPos);
         
         //set its rotation 
-        b.gameobject.transform.rotation = Quaternion.Euler(b.branchState.pitch, b.branchState.roll, b.branchState.heading);
+        b.setRotation(new Vector3(b.branchState.pitch, b.branchState.roll, b.branchState.heading));
         
-        //adjust its scale and thickness
-        //b.gameobject.transform.localScale = new Vector3(b.branchState.radius, b.branchState.step, b.branchState.radius);
-       
+        
+    }
+
+    public void displayBranch(BrancheV2 b, GameObject parent)
+    {
+        b.addGameObject(parent);
+        b.setGPosition(b.position);
+        b.setGRotation(b.rotation);
+  
         //cubes and cylinders don't have the same scale in unity so :
         b.gameobject.transform.localScale = new Vector3(b.branchState.radius, b.branchState.step/2, b.branchState.radius); //cylinder
-
-        // b.gameobject.transform.localScale = new Vector3(0.1f, b.branchState.step, 0.1f); //cube
-        
+        //b.gameobject.transform.localScale = new Vector3(0.1f, b.branchState.step, 0.1f); //cube
     }
 
     //fonction qui parse la chaine passée en paramètre 

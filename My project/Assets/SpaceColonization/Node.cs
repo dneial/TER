@@ -27,7 +27,7 @@ public class Node {
         this.originalDirection = direction;
     }
 
-    public Node GetNext() {
+    public Node CreateNext() {
         return new Node(this.position + this.direction * this.step, this.direction, this);
     }
 }

@@ -4,19 +4,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BrancheV2 
+public class BrancheV2 : INode
 {
     public int id{ get; }
     public Vector3 position{ get; set; }
-    public BrancheV2 parent { get; set; }
+    public Vector3 rotation { get; set; }
+    public INode parent { get; set; }
     public GameObject gameobject { get; set; }
     public BranchState branchState { get; set; }
 
 
-    public BrancheV2(int id, BrancheV2 parent) {
+    public BrancheV2(int id, INode parent) {
         this.id = id;
         this.parent = parent;
-        this.position = parent.getPosition();
+        this.position = parent.position;
         this.branchState = new BranchState();
     }
 
@@ -67,11 +68,35 @@ public class BrancheV2
     }
 
     public void setPosition(Vector3 position) {
-        this.position = this.gameobject.transform.position = position;
+        this.position = position;
     }
 
     public Vector3 getPosition() {
+        return this.position;
+    }
+
+    public void setGPosition(Vector3 position) {
+        this.gameobject.transform.position = position;
+    }
+
+    public Vector3 getGPosition() {
         return this.gameobject.transform.position;
+    }
+
+    public void setRotation(Vector3 rotation) {
+        this.rotation = rotation;
+    }
+
+    public Vector3 getRotation() {
+        return this.rotation;
+    }
+
+    public void setGRotation(Vector3 rotation) {
+        this.gameobject.transform.rotation = Quaternion.Euler(rotation);
+    }
+
+    public Vector3 getGRotation() {
+        return this.gameobject.transform.rotation.eulerAngles;
     }
 
     // to string method

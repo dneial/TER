@@ -25,6 +25,10 @@ public class LSystemMenu : EditorWindow
     static float angle = 25;
     static float noise = 5f;
     static float branch_chance = 0.8f;
+
+    static bool display = false;
+    List<INode> points;
+
     //static int grammar = 0;
 
 
@@ -86,12 +90,19 @@ public class LSystemMenu : EditorWindow
         GUILayout.Label("branch_chance");
         branch_chance = EditorGUILayout.Slider(branch_chance, 0, 1);
 
+        GUILayout.Label("Display");
+        display = EditorGUILayout.Toggle(display);
+
         numGrammar = EditorGUILayout.Popup("Grammar", numGrammar, files);
+
+       
 
         if(GUILayout.Button("Generate")){
             saveConfig(new Config(thickness, length, configName, nbIteration, angle, noise, branch_chance, files[numGrammar])); 
 
             parent = new GameObject();
+            points = new List<INode>();
+
 
             lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Grammar/" + files[numGrammar]);
             lsystem.Generate(nbIteration);
@@ -104,10 +115,30 @@ public class LSystemMenu : EditorWindow
                 lsystem.trad(thickness, length, angle, noise);
             }
             LSystemGen2 generator = new LSystemGen2(lsystem, parent);
-            generator.ParseAndPlace(lsystem.current);
-
+            
+            points = generator.ParseAndPlace(lsystem.current, display);
+   
             
         }
+
+        if(GUILayout.Button("Afficher Branches")){    
+
+            if (parent == null || points == null || points.Count == 0 || lsystem == null)
+            {
+                Debug.Log("No branches to display");
+            }
+            else
+            {
+                LSystemGen2 generator = new LSystemGen2(lsystem, parent);
+                foreach (INode point in points){
+                    generator.displayBranch((BrancheV2) point, parent);
+                }
+                //vider la liste des points pour ne pas afficher les branches plusieurs fois
+                points.Clear();
+                
+
+            }  
+        }       
     }
 
 

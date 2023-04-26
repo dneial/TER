@@ -150,7 +150,7 @@ public class SpaceColonization
                 node.influences = 0;
                 node.isInfluenced = false;
                 
-                newNode = node.GetNext();
+                newNode = node.CreateNext();
                 newNodes.Add(newNode);
 
                 growThickness(newNode);
@@ -199,7 +199,7 @@ public class SpaceColonization
         root.isInfluenced = influenceSet.Count > 0;
 
         while(!root.isInfluenced) {
-            root = root.GetNext();
+            root = root.CreateNext();
             influenceSet = this.FindInfluencingLeaves(root.position);
             root.isInfluenced = influenceSet.Count > 0;
             growThickness(root);
