@@ -7,7 +7,7 @@ using UnityEditor;
 public class SpaceColonizationMenu : EditorWindow
 {
 
-    [MenuItem("GameObject/Space Colonization")]
+    [MenuItem("Coral/Space Colonization")]
     public static void showWindow() {
         EditorWindow window = GetWindow(typeof(SpaceColonizationMenu));
         window.Show();

@@ -10,7 +10,7 @@ public class LConfig {
 
 public class LSystemMenu : EditorWindow
 {
-    [MenuItem("GameObject/L-System")]
+    [MenuItem("Coral/L-System")]
     public static void showWindow() {
         EditorWindow window = GetWindow(typeof(LSystemMenu));
         window.Show();
@@ -37,7 +37,7 @@ public class LSystemMenu : EditorWindow
     int numGrammar;
     void OnGUI()
     {
-        string[] tmp = Directory.GetFiles(Application.dataPath + "/Grammar/", "*.lsys?");
+        string[] tmp = Directory.GetFiles(Application.dataPath + "/Coral/L-System/Grammar/", "*.lsys?");
 
         //trier les fichiers par ordre de leur extension
         string[] files = sortbyExt(tmp);
@@ -50,7 +50,7 @@ public class LSystemMenu : EditorWindow
 
         LConfig lConfig = new LConfig();
         if(File.Exists(Application.dataPath + "/Config.json")){
-            lConfig = JsonUtility.FromJson<LConfig>(File.ReadAllText(Application.dataPath + "/Config.json"));
+            lConfig = JsonUtility.FromJson<LConfig>(File.ReadAllText(Application.dataPath + "Coral/L-System/Config.json"));
         }
         string[] nameLConfig = new string[lConfig.myConfigs.Count+1];
 
@@ -104,7 +104,7 @@ public class LSystemMenu : EditorWindow
             points = new List<INode>();
 
 
-            lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Grammar/" + files[numGrammar]);
+            lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Coral/L-System/Grammar/" + files[numGrammar]);
             lsystem.Generate(nbIteration);
             //Debug.Log(lsystem.current);
 

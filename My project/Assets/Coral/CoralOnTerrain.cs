@@ -3,11 +3,11 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
-public class TestTerrain : EditorWindow
+public class CoralOnTerrain : EditorWindow
 {
-    [MenuItem("Terrain/Generation")]
+    [MenuItem("Coral/Generation")]
     public static void showWindow() {
-        EditorWindow window = GetWindow(typeof(TestTerrain));
+        EditorWindow window = GetWindow(typeof(CoralOnTerrain));
         window.Show();
     }
 
