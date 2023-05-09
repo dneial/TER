@@ -49,8 +49,8 @@ public class LSystemMenu : EditorWindow
         }
 
         LConfig lConfig = new LConfig();
-        if(File.Exists(Application.dataPath + "/Config.json")){
-            lConfig = JsonUtility.FromJson<LConfig>(File.ReadAllText(Application.dataPath + "Coral/L-System/Config.json"));
+        if(File.Exists(Application.dataPath + "Coral/L-System/Config.json")){
+            lConfig = JsonUtility.FromJson<LConfig>(File.ReadAllText(Application.dataPath + "/Coral/L-System/Config.json"));
         }
         string[] nameLConfig = new string[lConfig.myConfigs.Count+1];
 
@@ -143,7 +143,7 @@ public class LSystemMenu : EditorWindow
 
 
     private void saveConfig(Config config){
-        var path = Application.dataPath + "/Config.json";
+        var path = Application.dataPath + "/Coral/L-System/Config.json";
         LConfig lConfig = new LConfig();
         if(File.Exists(path)){
             lConfig = JsonUtility.FromJson<LConfig>(File.ReadAllText(path));

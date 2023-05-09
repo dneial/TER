@@ -21,10 +21,8 @@ public class CorailGeneratorMenu : EditorWindow
             case 0:
                 break;
             case 1:
-                GetWindow(typeof(LSystemMenu)).Show();
                 break;
             case 2:
-                GetWindow(typeof(SpaceColonizationMenu)).Show();
                 break;
         }
     }
