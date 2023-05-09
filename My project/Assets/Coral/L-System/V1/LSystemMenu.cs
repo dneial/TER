@@ -4,6 +4,25 @@ using UnityEngine;
 using UnityEditor;
 
 [System.Serializable]
+public struct Config {
+    public string name;
+    public float thickness;
+    public float length;
+    public int nbIteration;
+    public float angle;
+    public string grammar;
+
+    public Config(float thickness, float length, string name, int nbIteration, float angle, string grammar){
+        this.name = name;   
+        this.thickness = thickness;
+        this.length = length;
+        this.nbIteration = nbIteration;
+        this.angle = angle;
+        this.grammar = grammar;
+    }
+}
+
+[System.Serializable]
 public class LConfig {
     public List<Config> myConfigs = new List<Config>();
 }
@@ -23,8 +42,6 @@ public class LSystemMenu : EditorWindow
     static float length = 0.75f;
     static int nbIteration = 3;
     static float angle = 25;
-    static float noise = 5f;
-    static float branch_chance = 0.8f;
 
     static bool display = false;
     List<INode> points;
@@ -83,12 +100,6 @@ public class LSystemMenu : EditorWindow
 
         GUILayout.Label("angle");
         angle = EditorGUILayout.Slider(angle, 0, 360);
-        
-        GUILayout.Label("noise");
-        noise = EditorGUILayout.Slider(noise, 0, 360);
-
-        GUILayout.Label("branch_chance");
-        branch_chance = EditorGUILayout.Slider(branch_chance, 0, 1);
 
         GUILayout.Label("Display");
         display = EditorGUILayout.Toggle(display);
@@ -98,8 +109,6 @@ public class LSystemMenu : EditorWindow
        
 
         if(GUILayout.Button("Generate")){
-            saveConfig(new Config(thickness, length, configName, nbIteration, angle, noise, branch_chance, files[numGrammar])); 
-
             parent = new GameObject();
             points = new List<INode>();
 
@@ -112,13 +121,17 @@ public class LSystemMenu : EditorWindow
             if (files[numGrammar].EndsWith(".lsys"))
             {
                 //traduction de la gammaire lsystemV1 en lsystemV2
-                lsystem.trad(thickness, length, angle, noise);
+                lsystem.trad(thickness, length, angle);
             }
             LSystemGen2 generator = new LSystemGen2(lsystem, parent);
             
             points = generator.ParseAndPlace(lsystem.current, display);
    
             
+        }
+
+        if(GUILayout.Button("Save configuration")){
+            saveConfig(new Config(thickness, length, configName, nbIteration, angle, files[numGrammar]));
         }
 
         if(GUILayout.Button("Afficher Branches")){    
@@ -147,6 +160,7 @@ public class LSystemMenu : EditorWindow
         LConfig lConfig = new LConfig();
         if(File.Exists(path)){
             lConfig = JsonUtility.FromJson<LConfig>(File.ReadAllText(path));
+            Debug.Log("ici " + JsonUtility.ToJson(lConfig));
         }
         lConfig.myConfigs.Add(config);
         File.WriteAllText(path, JsonUtility.ToJson(lConfig));
@@ -158,8 +172,6 @@ public class LSystemMenu : EditorWindow
         length = config.length;
         nbIteration = config.nbIteration;
         angle = config.angle;
-        noise = config.noise;
-        branch_chance = config.branch_chance;
         for (int i = 0; i < files.Length; i++){
             if(files[i].Equals(config.grammar)){
                 numGrammar = i;

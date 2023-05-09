@@ -83,13 +83,12 @@ public class Lsystem {
     }
 
     //traduire la chaine de caractère de lsystem v1 en lsystem v2
-    public void trad(float thickness, float length, float angle, float noise)
+    public void trad(float thickness, float length, float angle)
     {
 
         string t = thickness.ToString();
         string l = length.ToString();
         string a = angle.ToString();
-        string n = noise.ToString();
         
         string tmp = "";
 
