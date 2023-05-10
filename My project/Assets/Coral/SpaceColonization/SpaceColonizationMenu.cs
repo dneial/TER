@@ -51,7 +51,7 @@ public class SpaceColonizationMenu : EditorWindow
         GUILayout.Label("Max Iterations");
         max_iterations = EditorGUILayout.IntSlider(max_iterations, 1, 1000);
 
-        GUIContent content = new GUIContent("New Leaves", "Number of new leaves to add each iteration");
+        GUIContent content = new GUIContent("New Leaves", "Number of new leaves to add on each iteration");
         new_leaves = EditorGUILayout.IntSlider(content, new_leaves, 0, 100);
 
         thickness.AddKey(0.4f, 0.9f);
@@ -76,7 +76,7 @@ public class SpaceColonizationMenu : EditorWindow
 
             DestroyImmediate(go);
 
-            generator.Generate(max_iterations);
+            generator.Generate(max_iterations, new_leaves);
             this.view.update(this.generator.GetNodes(), thickness);
             
             Debug.Log("Generated after " + generator.steps + " steps");
