@@ -48,11 +48,11 @@ public class SpaceColonization
     }
     
 
-    public void Generate(int max_iterations)
+    public void Generate(int max_iterations, int new_leaves_per_iteration = 0)
     {
         this.start();
         while(!this.done && this.steps < max_iterations) {
-            this.leaves.AddRange(this.PlaceLeaves(5));
+            this.leaves.AddRange(this.PlaceLeaves(new_leaves_per_iteration));
             this.Grow();
         }
         this.NormalizeThickness();
@@ -234,10 +234,10 @@ public class SpaceColonization
 
         points.AddRange(this.PlacePointsInMesh(nb_points));
 
-        while(points.Count < nb_points)
-        {
-            points.AddRange(this.PlacePointsInMesh(nb_points - points.Count));
-        }
+        // while(points.Count < nb_points)
+        // {
+        //     points.AddRange(this.PlacePointsInMesh(nb_points - points.Count));
+        // }
 
         return points.ToArray();
     }
@@ -275,41 +275,13 @@ public class SpaceColonization
         foreach(Vector3 p in points)
         {
             Vector3 depart = p;
-            RaycastHit[] hits;
-
-            Vector3[] directions = 
-            new Vector3[] { 
-                Vector3.right, 
-                Vector3.forward, 
-                Vector3.left, 
-                Vector3.back,
-                Vector3.down,
-                new Vector3(1, 1, 0),
-                new Vector3(1, 1, 1),
-                new Vector3(1, 1, -1),
-                new Vector3(1, -1, 0),
-                new Vector3(1, -1, 1),
-                new Vector3(1, -1, -1),
-                new Vector3(-1, 1, 0),
-                new Vector3(-1, 1, 1),
-                new Vector3(-1, 1, -1),
-                new Vector3(-1, -1, 0),
-                new Vector3(-1, -1, 1),
-                new Vector3(-1, -1, -1)
-            };
+            //RaycastHit[] hits;
 
 
-            int collisions = 0;
-
-            foreach(Vector3 dir in directions)
-            {
-                hits = Physics.RaycastAll(depart, dir, 100.0f);
-                if(hits.Length > 0)
-                {
-                    collisions++;
-                    break;
-                }
-            }
+            Vector3 direction = this.GetDirection(depart, this.vol.center);
+            RaycastHit[] hits = Physics.RaycastAll(depart, direction, 100.0f);
+            
+            int collisions = hits.Length;
 
             if(collisions == 0)
             {
@@ -317,7 +289,10 @@ public class SpaceColonization
             }
         }
 
-        return newPoints.ToArray();
+        if(newPoints.Count > 0)
+            return newPoints.ToArray();
+        else 
+            return points;
     }
 
 

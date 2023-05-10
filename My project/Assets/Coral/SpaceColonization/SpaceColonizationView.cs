@@ -50,7 +50,7 @@ public class SpaceColonizationView {
                 {
                     float actualThickness = thickness.Evaluate(node.thickness);
                     capsule.transform.localScale = new Vector3(actualThickness, (actualThickness+Vector3.Distance(node.position, node.parent.position))/2, actualThickness);
-                    /*if(node.parent != null){
+                    /*if(nod.parent != null){
                         MajVerticesCapsule(capsule, actualThickness,thickness.Evaluate(node.parent.thickness));
                     } else {
                         MajVerticesCapsule(capsule, actualThickness,1);
