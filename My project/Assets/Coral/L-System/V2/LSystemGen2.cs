@@ -248,6 +248,8 @@ public class LSystemGen2
         //cubes and cylinders don't have the same scale in unity so :
         b.gameobject.transform.localScale = new Vector3(b.branchState.radius, b.branchState.step/2, b.branchState.radius); //cylinder
         //b.gameobject.transform.localScale = new Vector3(0.1f, b.branchState.step, 0.1f); //cube
+
+        placeSphere(b, b.position, b.rotation);
     }
 
     //fonction qui parse la chaine passée en paramètre 

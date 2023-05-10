@@ -80,6 +80,16 @@ public class SpaceColonizationMenu : EditorWindow
             this.view.update(this.generator.GetNodes(), thickness);
             
             Debug.Log("Generated after " + generator.steps + " steps");
+
+            if (this.view.GetRoot() == null)
+            {
+                Debug.Log("No branches to combine");
+            }
+            else
+            {
+                MeshCombiner combiner = new MeshCombiner(this.view.GetRoot());
+                combiner.combineMeshes();
+            }
             
         }
 

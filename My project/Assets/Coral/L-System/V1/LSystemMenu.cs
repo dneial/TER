@@ -43,7 +43,7 @@ public class LSystemMenu : EditorWindow
     static int nbIteration = 3;
     static float angle = 25;
 
-    static bool display = false;
+    static bool display = true;
     List<INode> points;
 
     //static int grammar = 0;
@@ -151,7 +151,20 @@ public class LSystemMenu : EditorWindow
                 
 
             }  
-        }       
+        }
+
+        //combiner les meshes
+        if(GUILayout.Button("Combine Meshes")){
+            if (parent == null)
+            {
+                Debug.Log("No branches to combine");
+            }
+            else
+            {
+                MeshCombiner combiner = new MeshCombiner(parent);
+                combiner.combineMeshes();
+            }
+        }   
     }
 
 
