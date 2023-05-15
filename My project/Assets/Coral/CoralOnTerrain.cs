@@ -112,20 +112,33 @@ public class CoralOnTerrain : EditorWindow
     GameObject CreateCoral(){
         if(prefab == null)
             {
-                prefab = AssetDatabase.LoadAssetAtPath("Assets/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
+                prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonization/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
             }
 
             GameObject go = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
             Bounds bounds = go.GetComponent<MeshCollider>().bounds;
-            
-            SpaceColonization generator = new SpaceColonization(bounds, leaf_kill_distance, leaf_influence_radius, influence_points);
-            SpaceColonizationView view = new SpaceColonizationView();
 
-            DestroyImmediate(go);
+            if((int)Random.Range(0,2) == 0){
+                Debug.Log("Space");
+                SpaceColonization generator = new SpaceColonization(bounds, leaf_kill_distance, leaf_influence_radius, influence_points);
+                SpaceColonizationView view = new SpaceColonizationView();
 
-            generator.Generate(max_iterations);
-            view.update(generator.GetNodes(), thickness);
+                DestroyImmediate(go);
 
-            return view.GetRoot();
+                generator.Generate(max_iterations);
+                view.update(generator.GetNodes(), thickness);
+
+                return view.GetRoot();
+            } else {
+                Debug.Log("LSytem");
+                GameObject parent = new GameObject();
+                Lsystem lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Coral/L-System/Grammar/UASG.lsys2");
+                lsystem.Generate((int)Random.Range(3, 5));
+
+                LSystemGen2 generator = new LSystemGen2(lsystem, parent);
+                
+                generator.ParseAndPlace(lsystem.current, true);
+                return parent;
+            }     
     }
 }
