@@ -5,8 +5,8 @@ angle : 22,5
 
 rules :
 A = B[-A]C[+A]B
-B (0,5)= BB
-B (0,5)= BA
+B (0,5) = BB
+B (0,5) = BA
 C = CE[-E+A]
-E = (0,5) B-^E
-E = (0,5) B+&E
+E (0,5) = B-^E
+E (0,5) = B+&E

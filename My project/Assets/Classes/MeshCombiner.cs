@@ -43,7 +43,7 @@ public class MeshCombiner
         this.combinedMeshGameObject.AddComponent<MeshFilter>().mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         this.combinedMeshGameObject.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
 
-        //pas ici pour les textures mais t'as compris
+        //TEXTURES ICI
         this.combinedMeshGameObject.AddComponent<MeshRenderer>().material = sourceMeshFilters[0].GetComponent<MeshRenderer>().sharedMaterial;
 
         //delete parentmesh

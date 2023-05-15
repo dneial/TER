@@ -90,7 +90,8 @@ public class Lsystem {
         string l = length.ToString();
         string a = angle.ToString();
         
-        string tmp = "";
+        string tmp = "F0 ";
+        int cpt = 0;
 
         for(int i = 0; i < current.Length; i++)
         {
@@ -129,11 +130,19 @@ public class Lsystem {
             }
             else if(current[i] == '[')
             {
-               tmp += "[ ";
+                if(i != 0 )
+                {
+                    tmp += "[ ";
+                    cpt++;
+                }
             }
             else if(current[i] == ']')
             {
-               tmp += "] ";
+                if(cpt > 0) 
+                {
+                    tmp += "] ";
+                    cpt--;
+                }
             }
             else 
             {
