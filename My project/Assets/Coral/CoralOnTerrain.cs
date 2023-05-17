@@ -124,10 +124,11 @@ public class CoralOnTerrain : EditorWindow
                 prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonization/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
             }
 
-            GameObject go = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
-            Bounds bounds = go.GetComponent<MeshCollider>().bounds;
 
             if((int)Random.Range(0,2) == 0){
+                GameObject go = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
+                Bounds bounds = go.GetComponent<MeshCollider>().bounds;
+                
                 Debug.Log("Space");
                 SpaceColonization generator = new SpaceColonization(bounds, leaf_kill_distance, leaf_influence_radius, influence_points);
                 SpaceColonizationView view = new SpaceColonizationView();

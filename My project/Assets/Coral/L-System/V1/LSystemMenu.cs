@@ -124,7 +124,7 @@ public class LSystemMenu : EditorWindow
             if (files[numGrammar].EndsWith(".lsys"))
             {
                 //traduction de la gammaire lsystemV1 en lsystemV2
-                lsystem.trad(thickness, length, angle);
+                lsystem.trad(length, angle);
             }
             LSystemGen generator = new LSystemGen(lsystem, parent);
             
