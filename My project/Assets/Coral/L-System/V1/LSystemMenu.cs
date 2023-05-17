@@ -29,6 +29,9 @@ public class LConfig {
 
 public class LSystemMenu : EditorWindow
 {
+
+    //vector2 scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+
     [MenuItem("Coral/L-System")]
     public static void showWindow() {
         EditorWindow window = GetWindow(typeof(LSystemMenu));
@@ -123,7 +126,7 @@ public class LSystemMenu : EditorWindow
                 //traduction de la gammaire lsystemV1 en lsystemV2
                 lsystem.trad(thickness, length, angle);
             }
-            LSystemGen2 generator = new LSystemGen2(lsystem, parent);
+            LSystemGen generator = new LSystemGen(lsystem, parent);
             
             points = generator.ParseAndPlace(lsystem.current, display);
    
@@ -142,9 +145,9 @@ public class LSystemMenu : EditorWindow
             }
             else
             {
-                LSystemGen2 generator = new LSystemGen2(lsystem, parent);
+                LSystemGen generator = new LSystemGen(lsystem, parent);
                 foreach (INode point in points){
-                    generator.displayBranch((BrancheV2) point, parent);
+                    generator.displayBranch((Branche) point, parent);
                 }
                 //vider la liste des points pour ne pas afficher les branches plusieurs fois
                 points.Clear();

@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BrancheV2 : INode
+public class Branche : INode
 {
     public int id{ get; }
     public Vector3 position{ get; set; }
@@ -14,7 +14,7 @@ public class BrancheV2 : INode
     public BranchState branchState { get; set; }
 
 
-    public BrancheV2(int id, INode parent) {
+    public Branche(int id, INode parent) {
         this.id = id;
         this.parent = parent;
         this.position = parent.position;
@@ -22,14 +22,14 @@ public class BrancheV2 : INode
     }
 
     // constructor for the first branch
-    public BrancheV2(int id, Vector3 position) {
+    public Branche(int id, Vector3 position) {
         this.id = id;
         this.parent = null;
         this.position = position;
         this.branchState = new BranchState();
     }
 
-    public BrancheV2(int id)
+    public Branche(int id)
     {
         //Fausse branche pour marquer un branchement
         this.id = -1;
@@ -38,7 +38,7 @@ public class BrancheV2 : INode
         this.branchState = null;
     }
 
-    public BrancheV2()
+    public Branche()
     {
         this.id = 0;
         this.parent = null;

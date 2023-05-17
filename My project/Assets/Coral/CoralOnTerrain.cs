@@ -135,7 +135,7 @@ public class CoralOnTerrain : EditorWindow
                 Lsystem lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Coral/L-System/Grammar/UASG.lsys2");
                 lsystem.Generate((int)Random.Range(3, 5));
 
-                LSystemGen2 generator = new LSystemGen2(lsystem, parent);
+                LSystemGen generator = new LSystemGen(lsystem, parent);
                 
                 generator.ParseAndPlace(lsystem.current, true);
                 return parent;

@@ -3,24 +3,24 @@ using System.IO;
 using UnityEngine;
 using UnityEditor;
 
-public class LSystemGen2
+public class LSystemGen
 {
     public Lsystem lsystem;
     public GameObject parent;
     public int nbBranches = 0;
     public List<INode> branches;
-    public Stack<BrancheV2> stackBranches;
-    public Stack<BrancheV2> stackNodes;
+    public Stack<Branche> stackBranches;
+    public Stack<Branche> stackNodes;
     public Stack<BranchState> stateStack;
 
-    public LSystemGen2(Lsystem lsystem, GameObject parent)
+    public LSystemGen(Lsystem lsystem, GameObject parent)
     {
         this.lsystem = lsystem;
         this.parent = parent;
 
         this.branches = new List<INode>();
-        this.stackBranches = new Stack<BrancheV2>();
-        this.stackNodes = new Stack<BrancheV2>();
+        this.stackBranches = new Stack<Branche>();
+        this.stackNodes = new Stack<Branche>();
         this.stateStack = new Stack<BranchState>();
     }
 
@@ -103,16 +103,16 @@ public class LSystemGen2
                     currentState.step = valueParse(word.Substring(1));                
                 }
                 
-                //create a new instance of BrancheV2 EACH TIME
-                BrancheV2 b;
+                //create a new instance of Branche EACH TIME
+                Branche b;
                 
                 if (stackBranches.Count == 0) {
                     //create first branch from gameobject position
-                    b = new BrancheV2(++nbBranches, parent.transform.position);
+                    b = new Branche(++nbBranches, parent.transform.position);
                 }
                 else {
                     //create branch from last branch
-                    b = new BrancheV2(++nbBranches, stackBranches.Peek());
+                    b = new Branche(++nbBranches, stackBranches.Peek());
                 }
 
                 b.setState(new BranchState(currentState));
@@ -175,7 +175,7 @@ public class LSystemGen2
             if (displayOn && word != "" && (word == words[words.Length - 1] || word[0] == ']'))
             {
                 //dernière branche créée :
-                BrancheV2 tmp = stackBranches.Peek();
+                Branche tmp = stackBranches.Peek();
                 Vector3 pos = tmp.getGPosition();
                 Vector3 rota = tmp.getGRotation();
 
@@ -200,10 +200,10 @@ public class LSystemGen2
     }
 
     //fonction qui calcule la position et place la branche par rapport à son parent
-    public void calculatePosition(BrancheV2 b)
+    public void calculatePosition(Branche b)
     {
         //get the parent of b
-        BrancheV2 parent = (BrancheV2) b.parent;
+        Branche parent = (Branche) b.parent;
 
         //bunch of variables
         Vector3 parentPos, parentRot, parentExtremity, newPos;
@@ -239,7 +239,7 @@ public class LSystemGen2
         
     }
 
-    public void displayBranch(BrancheV2 b, GameObject parent)
+    public void displayBranch(Branche b, GameObject parent)
     {
         b.addGameObject(parent);
         b.setGPosition(b.position);
@@ -272,7 +272,7 @@ public class LSystemGen2
         }
     }
 
-    public void placeSphere(BrancheV2 b, Vector3 pos, Vector3 rot)
+    public void placeSphere(Branche b, Vector3 pos, Vector3 rot)
     {
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
         sphere.transform.position = pos;
