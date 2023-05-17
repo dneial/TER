@@ -30,6 +30,11 @@ public class MeshCombiner
         }
     }
 
+    public GameObject getCombinedMesh()
+    {
+        return this.combinedMeshGameObject;
+    }
+
     public void combineMeshes()
     {
         var combine = new CombineInstance[sourceMeshFilters.Count];

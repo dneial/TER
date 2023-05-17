@@ -103,9 +103,18 @@ public class CoralOnTerrain : EditorWindow
             sphere.GetComponent<MeshRenderer>().material.SetColor("_Color", Color.red);
             sphere.transform.localPosition = new Vector3(x, y, z);*/
             GameObject coral = CreateCoral();
-            coral.transform.parent = gen.transform;
-            coral.transform.localPosition = new Vector3(x, y, z);
-            cpt++;
+            if (coral == null)
+            {
+                Debug.Log("No branches to combine");
+            }
+            else
+            {
+                MeshCombiner combiner = new MeshCombiner(coral);
+                combiner.combineMeshes();
+                combiner.getCombinedMesh().transform.parent = gen.transform;
+                combiner.getCombinedMesh().transform.localPosition = new Vector3(x, y, z);
+                cpt++;
+            }
         }
     }
 
@@ -132,8 +141,22 @@ public class CoralOnTerrain : EditorWindow
             } else {
                 Debug.Log("LSytem");
                 GameObject parent = new GameObject();
-                Lsystem lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Coral/L-System/Grammar/UASG.lsys2");
+                
+                List<string> listpath = new List<string>();
+                listpath.Add("/Coral/L-System/Grammar/lophelia.lsys2");
+                listpath.Add("/Coral/L-System/Grammar/UASG.lsys2");
+                listpath.Add("/Coral/L-System/Grammar/custom.lsys");
+                
+                string path = listpath[(int)Random.Range(0, listpath.Count)];
+                
+                Lsystem lsystem = LsystemInterpretor.ParseFile(Application.dataPath + path);
+                
                 lsystem.Generate((int)Random.Range(3, 5));
+                if (path.EndsWith(".lsys"))
+                {
+                    //traduction de la gammaire lsystemV1 en lsystemV2
+                    lsystem.trad( 2, 25);
+                }
 
                 LSystemGen generator = new LSystemGen(lsystem, parent);
                 
