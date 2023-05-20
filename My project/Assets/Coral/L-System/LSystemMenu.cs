@@ -121,13 +121,14 @@ public class LSystemMenu : EditorWindow
             if (files[numGrammar].EndsWith(".lsys"))
             {
                 //traduction de la gammaire lsystemV1 en lsystemV2
-                lsystem.trad(length, angle);
+                lsystem.trad(thickness, length, angle);
             }
             LSystemGen generator = new LSystemGen(lsystem, parent);
             
             points = generator.ParseAndPlace(lsystem.current, display);
    
-            
+        //     MeshCombiner combiner = new MeshCombiner(parent);
+        //     combiner.combineMeshes();
         }
 
         if(GUILayout.Button("Save configuration")){

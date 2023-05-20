@@ -156,7 +156,7 @@ public class CoralOnTerrain : EditorWindow
                 if (path.EndsWith(".lsys"))
                 {
                     //traduction de la gammaire lsystemV1 en lsystemV2
-                    lsystem.trad( 2, 25);
+                    lsystem.trad(0.75f, 2f, 25f);
                 }
 
                 LSystemGen generator = new LSystemGen(lsystem, parent);
