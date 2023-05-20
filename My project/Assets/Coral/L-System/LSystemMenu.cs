@@ -29,9 +29,6 @@ public class LConfig {
 
 public class LSystemMenu : EditorWindow
 {
-
-    //vector2 scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-
     [MenuItem("Coral/L-System")]
     public static void showWindow() {
         EditorWindow window = GetWindow(typeof(LSystemMenu));
@@ -53,7 +50,7 @@ public class LSystemMenu : EditorWindow
 
 
     int numConfig;
-    string configName;
+    string configName = "";
     int numGrammar;
     void OnGUI()
     {
@@ -69,7 +66,7 @@ public class LSystemMenu : EditorWindow
         }
 
         LConfig lConfig = new LConfig();
-        if(File.Exists(Application.dataPath + "Coral/L-System/Config.json")){
+        if(File.Exists(Application.dataPath + "/Coral/L-System/Config.json")){
             lConfig = JsonUtility.FromJson<LConfig>(File.ReadAllText(Application.dataPath + "/Coral/L-System/Config.json"));
         }
         string[] nameLConfig = new string[lConfig.myConfigs.Count+1];
@@ -134,7 +131,17 @@ public class LSystemMenu : EditorWindow
         }
 
         if(GUILayout.Button("Save configuration")){
-            saveConfig(new Config(thickness, length, configName, nbIteration, angle, files[numGrammar]));
+            SavePopup popup = ScriptableObject.CreateInstance<SavePopup>();
+            if(configName == ""){
+                popup.setMsg("Nom de configuration vide !\nEchec de l'enregistrement");
+            } else if (saveConfig(new Config(thickness, length, configName, nbIteration, angle, files[numGrammar]))){
+                popup.setMsg("Enregistrement réussi");
+            } else {
+                popup.setMsg("Ce nom est déja pris !\nEchec de l'enregistrement");
+            }
+            popup.minSize = new Vector2(200, 90);
+            popup.maxSize = new Vector2(200, 90);
+            popup.Show();
         }
 
         if(GUILayout.Button("Afficher Branches")){    
@@ -171,15 +178,20 @@ public class LSystemMenu : EditorWindow
     }
 
 
-    private void saveConfig(Config config){
+    private bool saveConfig(Config config){
         var path = Application.dataPath + "/Coral/L-System/Config.json";
         LConfig lConfig = new LConfig();
         if(File.Exists(path)){
             lConfig = JsonUtility.FromJson<LConfig>(File.ReadAllText(path));
-            Debug.Log("ici " + JsonUtility.ToJson(lConfig));
+            foreach (var jConfig in lConfig.myConfigs) {
+                if(jConfig.name == config.name){
+                    return false;
+                }
+            }
         }
         lConfig.myConfigs.Add(config);
         File.WriteAllText(path, JsonUtility.ToJson(lConfig));
+        return true;
     }
 
     private void chargeConfig(Config config, string[] files){
