@@ -174,7 +174,6 @@ public class LSystemGen
             //si le mot est le dernier de la chaine ou ']', on arrondit le bout de la branche
             if (displayOn && word != "" && (word == words[words.Length - 1] || word == "]" || word == "] "))
             {
-                Debug.Log("dernier mot de la chaine : " + word);
                 //dernière branche créée :
                 Branche tmp = stackBranches.Peek();
                 Vector3 pos = tmp.getGPosition();
