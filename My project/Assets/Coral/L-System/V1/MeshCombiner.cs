@@ -27,6 +27,18 @@ public class MeshCombiner
             {
                 sourceMeshFilters.Add(meshFilter);
             }
+            //if child has children
+            if (child.childCount > 0)
+            {
+                foreach (Transform grandChild in child.transform)
+                {
+                    var grandChildMeshFilter = grandChild.GetComponent<MeshFilter>();
+                    if (grandChildMeshFilter != null)
+                    {
+                        sourceMeshFilters.Add(grandChildMeshFilter);
+                    }
+                }
+            }
         }
     }
 
@@ -50,6 +62,8 @@ public class MeshCombiner
 
         //TEXTURES ICI
         this.combinedMeshGameObject.AddComponent<MeshRenderer>().material = sourceMeshFilters[0].GetComponent<MeshRenderer>().sharedMaterial;
+        //set the color to light pink
+        this.combinedMeshGameObject.GetComponent<MeshRenderer>().material.color = new Color(1f, 0.5f, 0.5f, 1f);
 
         //delete parentmesh
         Object.DestroyImmediate(parentMesh);
