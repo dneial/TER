@@ -172,8 +172,9 @@ public class LSystemGen
             }
 
             //si le mot est le dernier de la chaine ou ']', on arrondit le bout de la branche
-            if (displayOn && word != "" && (word == words[words.Length - 1] || word[0] == ']'))
+            if (displayOn && word != "" && (word == words[words.Length - 1] || word == "]" || word == "] "))
             {
+                Debug.Log("dernier mot de la chaine : " + word);
                 //dernière branche créée :
                 Branche tmp = stackBranches.Peek();
                 Vector3 pos = tmp.getGPosition();
@@ -185,7 +186,7 @@ public class LSystemGen
                                         (tmp.branchState.step/2);
                 
                 //on place la sphère
-                placeSphere(tmp, branchEnd, rota);
+                //placeSphere(tmp, branchEnd, rota);
             }
             
         }
@@ -249,7 +250,11 @@ public class LSystemGen
         b.gameobject.transform.localScale = new Vector3(b.branchState.radius, b.branchState.step/2, b.branchState.radius); //cylinder
         //b.gameobject.transform.localScale = new Vector3(0.1f, b.branchState.step, 0.1f); //cube
 
-        placeSphere(b, b.position, b.rotation);
+        //extremité 
+        Vector3 branchEnd = b.position + Quaternion.Euler(b.rotation.x, b.rotation.y, b.rotation.z) *
+                                        Vector3.up *
+                                        (b.branchState.step/2);
+        placeSphere(b, branchEnd, b.rotation);
     }
 
     //fonction qui parse la chaine passée en paramètre 
