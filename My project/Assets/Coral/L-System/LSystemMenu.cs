@@ -6,15 +6,13 @@ using UnityEditor;
 [System.Serializable]
 public struct Config {
     public string name;
-    public float thickness;
     public float length;
     public int nbIteration;
     public float angle;
     public string grammar;
 
-    public Config(float thickness, float length, string name, int nbIteration, float angle, string grammar){
+    public Config(float length, string name, int nbIteration, float angle, string grammar){
         this.name = name;   
-        this.thickness = thickness;
         this.length = length;
         this.nbIteration = nbIteration;
         this.angle = angle;
@@ -37,8 +35,6 @@ public class LSystemMenu : EditorWindow
 
     public Lsystem lsystem;
     public GameObject parent;
-
-    static float thickness = 1;
     static float length = 0.75f;
     static int nbIteration = 3;
     static float angle = 25;
@@ -89,17 +85,14 @@ public class LSystemMenu : EditorWindow
         GUILayout.Label("Config Name");
         configName = EditorGUILayout.TextField("", configName);
 
-        GUILayout.Label("Thickness");
-        thickness = EditorGUILayout.Slider(thickness, 0, 1);
-
         GUILayout.Label("Length");
         length = EditorGUILayout.Slider(length, 0, 1);
 
-        GUILayout.Label("nbIteration");
-        nbIteration = EditorGUILayout.IntSlider(nbIteration, 1, 10);
-
         GUILayout.Label("angle");
         angle = EditorGUILayout.Slider(angle, 0, 360);
+
+        GUILayout.Label("nbIteration");
+        nbIteration = EditorGUILayout.IntSlider(nbIteration, 1, 10);
 
         GUILayout.Label("Display");
         display = EditorGUILayout.Toggle(display);
@@ -134,7 +127,7 @@ public class LSystemMenu : EditorWindow
             SavePopup popup = ScriptableObject.CreateInstance<SavePopup>();
             if(configName == ""){
                 popup.setMsg("Nom de configuration vide !\nEchec de l'enregistrement");
-            } else if (saveConfig(new Config(thickness, length, configName, nbIteration, angle, files[numGrammar]))){
+            } else if (saveConfig(new Config(length, configName, nbIteration, angle, files[numGrammar]))){
                 popup.setMsg("Enregistrement réussi");
             } else {
                 popup.setMsg("Ce nom est déja pris !\nEchec de l'enregistrement");
@@ -196,7 +189,6 @@ public class LSystemMenu : EditorWindow
 
     private void chargeConfig(Config config, string[] files){
         configName = config.name;
-        thickness = config.thickness;
         length = config.length;
         nbIteration = config.nbIteration;
         angle = config.angle;

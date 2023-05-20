@@ -8,6 +8,8 @@ public class CoralOnTerrain : EditorWindow
     [MenuItem("Coral/Generation")]
     public static void showWindow() {
         EditorWindow window = GetWindow(typeof(CoralOnTerrain));
+        window.minSize = new Vector2(325, 400);
+        window.maxSize = new Vector2(325, 400);
         window.Show();
     }
 
@@ -25,35 +27,26 @@ public class CoralOnTerrain : EditorWindow
         Terrain terrain = Terrain.activeTerrain;
         TerrainData td = terrain.GetComponent<Terrain>().terrainData;
 
-        probaHeight = AnimationCurve.EaseInOut(td.bounds.min.y, 1, td.bounds.max.y, 0.1f);
+        probaHeight = AnimationCurve.EaseInOut(td.bounds.max.y, 0.1f, td.bounds.min.y, 1);
         probaHeight = EditorGUILayout.CurveField("Apparition", probaHeight);
 
         GUILayout.Label("Nombre de generation");
         nbCoraux = EditorGUILayout.IntSlider(nbCoraux, 1, 1000);
 
-        GUILayout.Label("Leaf Influence Radius");
-        leaf_influence_radius = EditorGUILayout.Slider(leaf_influence_radius, 10, 100);
+        leaf_influence_radius = Random.Range(10, 70);
 
-        GUILayout.Label("Leaf Kill Distance");
-        leaf_kill_distance = EditorGUILayout.Slider(leaf_kill_distance, 1, 10);
+        leaf_kill_distance = Random.Range(1, 7);
 
-        GUILayout.Label("Influence Points");
-        influence_points = EditorGUILayout.IntSlider(influence_points, 50, 1000);
+        influence_points = Random.Range(50, 400);
 
-        GUILayout.Label("Volume Prefab");
-        prefab = EditorGUILayout.ObjectField(prefab, typeof(GameObject), true) as GameObject;
+        height = Random.Range(1, 10);
 
-        GUILayout.Label("Volume Height");
-        height = EditorGUILayout.Slider(height, 0.1f, 10);
-
-        GUILayout.Label("Max Iterations");
-        max_iterations = EditorGUILayout.IntSlider(max_iterations, 1, 1000);
+        max_iterations = Random.Range(100, 850);
 
         thickness.AddKey(0.4f, 0.9f);
         thickness.AddKey(0.3f, 0.8f);
         thickness.AddKey(0.95f, 1);
         thickness.SmoothTangents(3, -1);
-        thickness = EditorGUILayout.CurveField("Thickness", thickness);
 
         if(GUILayout.Button("RandomGeneration")) {
             RandomGeneration();
@@ -77,9 +70,6 @@ public class CoralOnTerrain : EditorWindow
             float y = Terrain.activeTerrain.SampleHeight(new Vector3(x,0,z)) + Terrain.activeTerrain.transform.position.y;
             if(Random.Range(0f, 1f) < probaHeight.Evaluate(y)) {
                 cpt++;
-                /*GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                sphere.GetComponent<MeshRenderer>().material.SetColor("_Color", Color.red);
-                sphere.transform.localPosition = new Vector3(x, y, z);*/
                 GameObject coral = CreateCoral();
                 coral.transform.parent = gen.transform;
                 coral.transform.localPosition = new Vector3(x, y, z);
@@ -99,9 +89,6 @@ public class CoralOnTerrain : EditorWindow
             float x = Random.Range(posTerrain.x, posTerrain.x+td.size.x);
             float z = Random.Range(posTerrain.z, posTerrain.z+td.size.z);
             float y = Terrain.activeTerrain.SampleHeight(new Vector3(x,0,z)) + Terrain.activeTerrain.transform.position.y;
-            /*GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-            sphere.GetComponent<MeshRenderer>().material.SetColor("_Color", Color.red);
-            sphere.transform.localPosition = new Vector3(x, y, z);*/
             GameObject coral = CreateCoral();
             if (coral == null)
             {
@@ -125,11 +112,10 @@ public class CoralOnTerrain : EditorWindow
             }
 
 
-            if((int)Random.Range(0,2) == 0){
+            if((int)Random.Range(0,4) == 0){
                 GameObject go = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
                 Bounds bounds = go.GetComponent<MeshCollider>().bounds;
                 
-                Debug.Log("Space");
                 SpaceColonization generator = new SpaceColonization(bounds, leaf_kill_distance, leaf_influence_radius, influence_points);
                 SpaceColonizationView view = new SpaceColonizationView();
 
@@ -140,7 +126,6 @@ public class CoralOnTerrain : EditorWindow
 
                 return view.GetRoot();
             } else {
-                Debug.Log("LSytem");
                 GameObject parent = new GameObject();
                 
                 List<string> listpath = new List<string>();
@@ -148,7 +133,8 @@ public class CoralOnTerrain : EditorWindow
                 listpath.Add("/Coral/L-System/Grammar/UASG.lsys2");
                 listpath.Add("/Coral/L-System/Grammar/custom.lsys");
                 
-                string path = listpath[(int)Random.Range(0, listpath.Count)];
+                int grammar = (int)Random.Range(0, listpath.Count);
+                string path = listpath[grammar];
                 
                 Lsystem lsystem = LsystemInterpretor.ParseFile(Application.dataPath + path);
                 
@@ -156,12 +142,14 @@ public class CoralOnTerrain : EditorWindow
                 if (path.EndsWith(".lsys"))
                 {
                     //traduction de la gammaire lsystemV1 en lsystemV2
-                    lsystem.trad( 2, 25);
+                    lsystem.trad(1, 25);
                 }
 
                 LSystemGen generator = new LSystemGen(lsystem, parent);
-                
                 generator.ParseAndPlace(lsystem.current, true);
+                if(grammar == 2){
+                    parent.transform.Rotate(Vector3.right, 180);
+                }
                 return parent;
             }     
     }
