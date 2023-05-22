@@ -183,7 +183,15 @@ public class SpaceColonizationMenu : EditorWindow
     }
 
     private void chargeConfig(ConfigSpaceColo config){
-
+        name = config.name;
+        leaf_influence_radius = config.leaf_influence_radius;
+        leaf_kill_distance = config.leaf_kill_distance;
+        influence_points = config.influence_points;
+        thickness = config.thickness;
+        height = config.height;
+        max_iterations = config.max_iterations;
+        new_leaves = config.new_leaves;
+        prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonisation/Blender_msh/" + config.prefab + ".fbx", typeof(GameObject)) as GameObject;
     }
     
 }
