@@ -30,7 +30,7 @@ public class SpaceColonizationView {
         foreach(Leaf leaf in leaves){
             GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             sphere.name = "Leaf " + leaf.id;
-            sphere.transform.localScale = new Vector3(1f, 1f, 1f);
+            sphere.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
             sphere.transform.position = leaf.position;
             sphere.transform.parent = this.root.transform;
             this.leaves.Add(leaf, sphere);

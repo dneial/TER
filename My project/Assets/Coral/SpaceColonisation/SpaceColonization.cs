@@ -17,8 +17,6 @@ public class SpaceColonization
 
     private Node root_node = new Node(Vector3.zero, Vector3.up);
 
-    private CrownVolume volume;
-
     private Bounds vol;
 
 
@@ -58,22 +56,6 @@ public class SpaceColonization
         this.NormalizeThickness();
     }
 
-
-/*
-
-    public IEnumerable<List<Leaf>> Generate(int max_iterations)
-    {
-        this.start();
-        while(!this.done && this.steps < max_iterations) {
-            this.Grow();
-            List<Leaf> newLeaves = this.PlaceLeaves(5); 
-            this.leaves.AddRange(newLeaves);
-            yield return newLeaves;
-        }
-        this.NormalizeThickness();
-    }
-
-*/
 
     // place x number of points around the center
     private List<Leaf> PlaceLeaves(int nbPoints) {
@@ -231,13 +213,14 @@ public class SpaceColonization
    private Vector3[] PlacePoints(int nb_points)
     {
         List<Vector3> points = new List<Vector3>();
+        int MAX_ITER = 200;
 
         points.AddRange(this.PlacePointsInMesh(nb_points));
 
-        // while(points.Count < nb_points)
-        // {
-        //     points.AddRange(this.PlacePointsInMesh(nb_points - points.Count));
-        // }
+        while(points.Count < nb_points && MAX_ITER-- > 0)
+        {
+            points.AddRange(this.PlacePointsInMesh(nb_points - points.Count));
+        }
 
         return points.ToArray();
     }
@@ -275,8 +258,6 @@ public class SpaceColonization
         foreach(Vector3 p in points)
         {
             Vector3 depart = p;
-            //RaycastHit[] hits;
-
 
             Vector3 direction = this.GetDirection(depart, this.vol.center);
             RaycastHit[] hits = Physics.RaycastAll(depart, direction, 100.0f);
