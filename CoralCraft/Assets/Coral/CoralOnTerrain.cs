@@ -23,9 +23,20 @@ public class CoralOnTerrain : EditorWindow
     static float leaf_kill_distance = 1f;
     static int influence_points = 100;
 
+    private Terrain terrain;
+    private TerrainData td;
+
     void OnGUI() {
-        Terrain terrain = Terrain.activeTerrain;
-        TerrainData td = terrain.GetComponent<Terrain>().terrainData;
+        terrain = Terrain.activeTerrain;
+
+        if(terrain == null){
+            td = AssetDatabase.LoadAssetAtPath("Assets/Terrain/Pre-Config.asset", typeof(TerrainData)) as TerrainData;
+            terrain = Terrain.CreateTerrainGameObject(td).GetComponent<Terrain>();
+
+        } else {
+            td = terrain.GetComponent<Terrain>().terrainData;
+        }
+
 
         probaHeight = AnimationCurve.EaseInOut(td.bounds.max.y, 0.1f, td.bounds.min.y, 1);
         probaHeight = EditorGUILayout.CurveField("Apparition", probaHeight);
@@ -69,10 +80,19 @@ public class CoralOnTerrain : EditorWindow
             float z = Random.Range(posTerrain.z, posTerrain.z+td.size.z);
             float y = Terrain.activeTerrain.SampleHeight(new Vector3(x,0,z)) + Terrain.activeTerrain.transform.position.y;
             if(Random.Range(0f, 1f) < probaHeight.Evaluate(y)) {
-                cpt++;
                 GameObject coral = CreateCoral();
-                coral.transform.parent = gen.transform;
-                coral.transform.localPosition = new Vector3(x, y, z);
+                if (coral == null)
+                {
+                    Debug.Log("No branches to combine");
+                }
+                else
+                {
+                    MeshCombiner combiner = new MeshCombiner(coral);
+                    combiner.combineMeshes();
+                    combiner.getCombinedMesh().transform.parent = gen.transform;
+                    combiner.getCombinedMesh().transform.localPosition = new Vector3(x, y, z);
+                    cpt++;
+                }
             }
         }
     }
@@ -108,11 +128,11 @@ public class CoralOnTerrain : EditorWindow
     GameObject CreateCoral(){
         if(prefab == null)
             {
-                prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonization/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
+                prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonisation/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
             }
 
 
-            if((int)Random.Range(0,4) == 0){
+            if((int)Random.Range(0,2) == 0){
                 GameObject go = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
                 Bounds bounds = go.GetComponent<MeshCollider>().bounds;
                 
@@ -125,6 +145,7 @@ public class CoralOnTerrain : EditorWindow
                 view.update(generator.GetNodes(), thickness);
 
                 return view.GetRoot();
+
             } else {
                 GameObject parent = new GameObject();
                 

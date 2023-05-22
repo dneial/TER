@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 
 [System.Serializable]
-public struct Config {
+public struct ConfigLSys {
     public string name;
     public float thickness;
     public float length;
@@ -12,7 +12,7 @@ public struct Config {
     public float angle;
     public string grammar;
 
-    public Config(float thickness, float length, string name, int nbIteration, float angle, string grammar){
+    public ConfigLSys(float thickness, float length, string name, int nbIteration, float angle, string grammar){
         this.name = name;  
         this.thickness = thickness; 
         this.length = length;
@@ -23,8 +23,8 @@ public struct Config {
 }
 
 [System.Serializable]
-public class LConfig {
-    public List<Config> myConfigs = new List<Config>();
+public class LConfigLSys {
+    public List<ConfigLSys> myConfigs = new List<ConfigLSys>();
 }
 
 public class LSystemMenu : EditorWindow
@@ -48,8 +48,8 @@ public class LSystemMenu : EditorWindow
     //static int grammar = 0;
 
 
-    int numConfig;
-    string configName = "";
+    static int numConfig;
+    static string configName = "";
     int numGrammar;
     void OnGUI()
     {
@@ -64,9 +64,9 @@ public class LSystemMenu : EditorWindow
             cursor++;
         }
 
-        LConfig lConfig = new LConfig();
+        LConfigLSys lConfig = new LConfigLSys();
         if(File.Exists(Application.dataPath + "/Coral/L-System/Config.json")){
-            lConfig = JsonUtility.FromJson<LConfig>(File.ReadAllText(Application.dataPath + "/Coral/L-System/Config.json"));
+            lConfig = JsonUtility.FromJson<LConfigLSys>(File.ReadAllText(Application.dataPath + "/Coral/SpaceColonisation/Config.json"));
         }
         string[] nameLConfig = new string[lConfig.myConfigs.Count+1];
 
@@ -134,7 +134,7 @@ public class LSystemMenu : EditorWindow
             SavePopup popup = ScriptableObject.CreateInstance<SavePopup>();
             if(configName == ""){
                 popup.setMsg("Nom de configuration vide !\nEchec de l'enregistrement");
-            } else if (saveConfig(new Config(thickness, length, configName, nbIteration, angle, files[numGrammar]))){
+            } else if (saveConfig(new ConfigLSys(thickness, length, configName, nbIteration, angle, files[numGrammar]))){
                 popup.setMsg("Enregistrement réussi");
             } else {
                 popup.setMsg("Ce nom est déja pris !\nEchec de l'enregistrement");
@@ -178,11 +178,11 @@ public class LSystemMenu : EditorWindow
     }
 
 
-    private bool saveConfig(Config config){
+    private bool saveConfig(ConfigLSys config){
         var path = Application.dataPath + "/Coral/L-System/Config.json";
-        LConfig lConfig = new LConfig();
+        LConfigLSys lConfig = new LConfigLSys();
         if(File.Exists(path)){
-            lConfig = JsonUtility.FromJson<LConfig>(File.ReadAllText(path));
+            lConfig = JsonUtility.FromJson<LConfigLSys>(File.ReadAllText(path));
             foreach (var jConfig in lConfig.myConfigs) {
                 if(jConfig.name == config.name){
                     return false;
@@ -194,7 +194,7 @@ public class LSystemMenu : EditorWindow
         return true;
     }
 
-    private void chargeConfig(Config config, string[] files){
+    private void chargeConfig(ConfigLSys config, string[] files){
         configName = config.name;
         // thickness = config.thickness;
         length = config.length;
