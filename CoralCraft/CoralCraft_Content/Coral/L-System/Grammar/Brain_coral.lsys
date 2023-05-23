@@ -1,9 +1,0 @@
-variables : A, B, C
-constants : +, -, [, ]
-start : A
-angle : 22,5
-
-rules :
-A = B[-A]C[+A]B
-B = BB
-C = C

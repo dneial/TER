@@ -63,7 +63,7 @@ public class MeshCombiner
         //TEXTURES ICI
         this.combinedMeshGameObject.AddComponent<MeshRenderer>().material = sourceMeshFilters[0].GetComponent<MeshRenderer>().sharedMaterial;
         //set the color to light pink
-        this.combinedMeshGameObject.GetComponent<MeshRenderer>().material.color = new Color(1f, 0.5f, 0.5f, 1f);
+        //this.combinedMeshGameObject.GetComponent<MeshRenderer>().material.color = new Color(1f, 0.5f, 0.5f, 1f);
 
         //delete parentmesh
         Object.DestroyImmediate(parentMesh);

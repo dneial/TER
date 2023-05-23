@@ -121,11 +121,13 @@ public class SpaceColonizationMenu : EditorWindow
                 prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonisation/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
             }
 
-            //genrtate collider
-            prefab.modelImporter.addCollider = true;
-
-
             GameObject go = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
+            
+            if(go.GetComponent<MeshCollider>() == null)
+            {
+                go.AddComponent<MeshCollider>();
+            }
+            
             Bounds bounds = go.GetComponent<MeshCollider>().bounds;
             
             generator = new SpaceColonization(bounds, leaf_kill_distance, leaf_influence_radius, influence_points);
