@@ -1,0 +1,10 @@
+variables : A, B, C, D
+constants : +, -, [, ], &, ^
+start : A
+angle : 30
+
+rules :
+A = B[-&A][+A]^^C
+B = D[+B-A]^D[-B]D
+C = [-&C][+^C]
+D = &+D

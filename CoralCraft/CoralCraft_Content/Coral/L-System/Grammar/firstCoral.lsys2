@@ -1,0 +1,14 @@
+variables : A, B
+constants : F, [, ], h, p, r, R, +, -
+start : A
+angle : 22.5
+
+rules :
+A = F0.75 B [ h-22.5 F0.75 A ] [ h22.5 F0.75 A ] B 
+B = F0.75 B B 
+
+# lignes commentées avec '#'
+#0: A
+#1: F0.75 B [ h-22.5 A ] [ h22.5 A ] B
+#2: F0.75 F0.75 B B [ h-22.5 F0.75 B [ h-22.5 A ] [ h22.5 A ] B ] [ h22.5 F0.75 B [ h-22.5 A ] [ h22.5 A ] B ] F0.75 B B
+#3: F0.75 F0.75 F0.75 B B F0.75 B B [ h-22.5 F0.75 F0.75 B B [ h-22.5 F0.75 B [ h-22.5 A ] [ h22.5 A ] B ] [ h22.5 F0.75 B [ h-22.5 A ] [ h22.5 A ] B ] F0.75 B B ] [ h22.5 F0.75 F0.75 B B [ h-22.5 F0.75 B [ h-22.5 A ] [ h22.5 A ] B ] [ h22.5 F0.75 B [ h-22.5 A ] [ h22.5 A ] B ] F0.75 B B ] F0.75 F0.75 B B F0.75 B B
