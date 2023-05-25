@@ -8,6 +8,8 @@ public class MeshCombiner
     private GameObject combinedMeshGameObject;
     private GameObject parentMesh;
 
+    private Material[] mats;
+
     public MeshCombiner(GameObject parentMesh, string name = "CombinedMesh")
     {
         this.parentMesh = parentMesh;
@@ -40,6 +42,8 @@ public class MeshCombiner
                 }
             }
         }
+
+        this.mats = Resources.LoadAll<Material>("Materials/"); 
     }
 
     public GameObject getCombinedMesh()
@@ -60,8 +64,14 @@ public class MeshCombiner
         this.combinedMeshGameObject.AddComponent<MeshFilter>().mesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
         this.combinedMeshGameObject.GetComponent<MeshFilter>().mesh.CombineMeshes(combine);
 
+        //Debug.Log("Meshes combined");
         //TEXTURES ICI
-        this.combinedMeshGameObject.AddComponent<MeshRenderer>().material = sourceMeshFilters[0].GetComponent<MeshRenderer>().sharedMaterial;
+
+        //attribuer aléatoirement un matériau de la liste
+        //Debug.Log("mats = " + this.mats.Length);
+        this.combinedMeshGameObject.AddComponent<MeshRenderer>().material = this.mats[Random.Range(0, mats.Length-1  )];
+
+        // this.combinedMeshGameObject.AddComponent<MeshRenderer>().material = sourceMeshFilters[0].GetComponent<MeshRenderer>().sharedMaterial;
         //set the color to light pink
         //this.combinedMeshGameObject.GetComponent<MeshRenderer>().material.color = new Color(1f, 0.5f, 0.5f, 1f);
 

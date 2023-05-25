@@ -134,6 +134,13 @@ public class CoralOnTerrain : EditorWindow
 
             if((int)Random.Range(0,2) == 0){
                 GameObject go = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
+
+                if(go.GetComponent<MeshCollider>() == null)
+                {
+                    // Debug.Log("No mesh collider found, adding one");
+                    go.AddComponent<MeshCollider>();
+                }
+
                 Bounds bounds = go.GetComponent<MeshCollider>().bounds;
                 
                 SpaceColonization generator = new SpaceColonization(bounds, leaf_kill_distance, leaf_influence_radius, influence_points);

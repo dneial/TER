@@ -57,7 +57,7 @@ public class Lsystem {
             // Debug.Log("current = " + current);
         }
 
-        Debug.Log("generated string = " + current);
+        //Debug.Log("generated string = " + current);
     }
 
 
@@ -152,7 +152,7 @@ public class Lsystem {
         tmp = tmp.Substring(0, tmp.Length - 1);
         this.current = tmp;
 
-        Debug.Log("current = " + this.current);
+        //Debug.Log("current = " + this.current);
     }
 
 }

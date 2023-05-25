@@ -125,6 +125,7 @@ public class SpaceColonizationMenu : EditorWindow
             
             if(go.GetComponent<MeshCollider>() == null)
             {
+                // Debug.Log("No mesh collider found, adding one");
                 go.AddComponent<MeshCollider>();
             }
             
