@@ -8,12 +8,12 @@ public class MeshCombiner
     private GameObject combinedMeshGameObject;
     private GameObject parentMesh;
 
-    public MeshCombiner(GameObject parentMesh)
+    public MeshCombiner(GameObject parentMesh, string name = "CombinedMesh")
     {
         this.parentMesh = parentMesh;
 
         //create a new gameobject for the combined mesh
-        this.combinedMeshGameObject = new GameObject("CombinedMesh");
+        this.combinedMeshGameObject = new GameObject(name);
         
         //set it as the target mesh
         // this.targetMeshFilter = combinedMeshGameObject.AddComponent<MeshFilter>();

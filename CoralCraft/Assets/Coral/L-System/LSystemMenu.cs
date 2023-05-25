@@ -37,12 +37,13 @@ public class LSystemMenu : EditorWindow
 
     public Lsystem lsystem;
     public GameObject parent;
-    static float thickness = 0.45f;
+    static float thickness = 0.25f;
     static float length = 0.75f;
     static int nbIteration = 3;
     static float angle = 25;
 
     static bool display = true;
+    static bool autoFuse = true;
     List<INode> points;
 
     //static int grammar = 0;
@@ -100,9 +101,17 @@ public class LSystemMenu : EditorWindow
         GUILayout.Label("nbIteration");
         nbIteration = EditorGUILayout.IntSlider(nbIteration, 1, 10);
 
+        // side to side toggle
+        GUILayout.BeginHorizontal();
+        
         GUILayout.Label("Display");
         display = EditorGUILayout.Toggle(display);
+        GUILayout.Label("AutoFuse Meshes");
+        autoFuse = EditorGUILayout.Toggle(autoFuse);
+        
+        GUILayout.EndHorizontal();
 
+        EditorGUILayout.Space();
         numGrammar = EditorGUILayout.Popup("Grammar", numGrammar, files);
 
        
@@ -126,8 +135,12 @@ public class LSystemMenu : EditorWindow
             
             points = generator.ParseAndPlace(lsystem.current, display);
    
-        //     MeshCombiner combiner = new MeshCombiner(parent);
-        //     combiner.combineMeshes();
+            if (autoFuse && parent != null)
+            {
+                MeshCombiner combiner = new MeshCombiner(parent, files[numGrammar]);
+                combiner.combineMeshes();
+            }
+             
         }
 
         if(GUILayout.Button("Save configuration")){
@@ -171,7 +184,7 @@ public class LSystemMenu : EditorWindow
             }
             else
             {
-                MeshCombiner combiner = new MeshCombiner(parent);
+                MeshCombiner combiner = new MeshCombiner(parent, files[numGrammar]);
                 combiner.combineMeshes();
             }
         }   
