@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.AnimatedValues;
+
 
 [System.Serializable]
 public struct ConfigLSys {
@@ -29,6 +31,8 @@ public class LConfigLSys {
 
 public class LSystemMenu : EditorWindow
 {
+    Vector2 scrollPos;
+
     [MenuItem("Coral/L-System")]
     public static void showWindow() {
         EditorWindow window = GetWindow(typeof(LSystemMenu));
@@ -42,22 +46,38 @@ public class LSystemMenu : EditorWindow
     static int nbIteration = 3;
     static float angle = 25;
 
-    static bool display = true;
-    static bool autoFuse = true;
     List<INode> points;
-
-    //static int grammar = 0;
 
 
     static int numConfig;
     static string configName = "";
     int numGrammar;
+
+    AnimBool display;
+    AnimBool autoFuse;
+    AnimBool grammarBool;
+
+    // pour cacher/afficher des actions dans le menu
+    private void OnEnable() {
+        display = new AnimBool(true);
+        display.valueChanged.AddListener(Repaint);
+
+        autoFuse = new AnimBool(true);
+        autoFuse.valueChanged.AddListener(Repaint);
+
+        grammarBool = new AnimBool(true);
+        grammarBool.valueChanged.AddListener(Repaint);
+    }
+
+
     void OnGUI()
     {
+        //récupérer les fichiers de grammaire
         string[] tmp = Directory.GetFiles(Application.dataPath + "/Coral/L-System/Grammar/", "*.lsys?");
 
         //trier les fichiers par ordre de leur extension
         string[] files = sortbyExt(tmp);
+
 
         int cursor = 0;
         foreach (string path in files){
@@ -65,10 +85,13 @@ public class LSystemMenu : EditorWindow
             cursor++;
         }
 
+        //récupérer les Config existantes
         LConfigLSys lConfig = new LConfigLSys();
+
         if(File.Exists(Application.dataPath + "/Coral/L-System/Config.json")){
-            lConfig = JsonUtility.FromJson<LConfigLSys>(File.ReadAllText(Application.dataPath + "/Coral/SpaceColonisation/Config.json"));
+            lConfig = JsonUtility.FromJson<LConfigLSys>(File.ReadAllText(Application.dataPath + "/Coral/L-System/Config.json"));
         }
+
         string[] nameLConfig = new string[lConfig.myConfigs.Count+1];
 
         nameLConfig[0] = "None";
@@ -78,7 +101,11 @@ public class LSystemMenu : EditorWindow
             cursor++;
         }
 
-        numConfig = EditorGUILayout.Popup("Pre-Config", numConfig, nameLConfig);
+        EditorGUILayout.BeginVertical();
+        scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+
+        //Charger Configurations
+        numConfig = EditorGUILayout.Popup("Preset", numConfig, nameLConfig);
 
         if(GUILayout.Button("Charger la config")){
             if(numConfig > 0){
@@ -86,63 +113,15 @@ public class LSystemMenu : EditorWindow
             }
         }
 
-        GUILayout.Label("Config Name");
-        configName = EditorGUILayout.TextField("", configName);
+        GUILayout.Space(2);
 
-        GUILayout.Label("Thickness");
-        thickness = EditorGUILayout.Slider(thickness, 0, 1);
-
-        GUILayout.Label("Length");
-        length = EditorGUILayout.Slider(length, 0, 1);
-
-        GUILayout.Label("angle");
-        angle = EditorGUILayout.Slider(angle, 0, 360);
-
-        GUILayout.Label("nbIteration");
-        nbIteration = EditorGUILayout.IntSlider(nbIteration, 1, 10);
-
-        // side to side toggle
-        GUILayout.BeginHorizontal();
+        //Créer une nouvelle configuration
+        EditorGUILayout.BeginHorizontal();
+        GUILayout.Label("New preset : ");
+        configName = EditorGUILayout.TextField(configName);
+        EditorGUILayout.EndHorizontal();
         
-        GUILayout.Label("Display");
-        display = EditorGUILayout.Toggle(display);
-        GUILayout.Label("AutoFuse Meshes");
-        autoFuse = EditorGUILayout.Toggle(autoFuse);
-        
-        GUILayout.EndHorizontal();
-
-        EditorGUILayout.Space();
-        numGrammar = EditorGUILayout.Popup("Grammar", numGrammar, files);
-
-       
-
-        if(GUILayout.Button("Generate")){
-            parent = new GameObject();
-            points = new List<INode>();
-
-
-            lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Coral/L-System/Grammar/" + files[numGrammar]);
-            lsystem.Generate(nbIteration);
-            //Debug.Log(lsystem.current);
-
-            //if extension is .lsys
-            if (files[numGrammar].EndsWith(".lsys"))
-            {
-                //traduction de la gammaire lsystemV1 en lsystemV2
-                lsystem.trad(thickness, length, angle);
-            }
-            LSystemGen generator = new LSystemGen(lsystem, parent);
-            
-            points = generator.ParseAndPlace(lsystem.current, display);
-   
-            if (autoFuse && parent != null)
-            {
-                MeshCombiner combiner = new MeshCombiner(parent, files[numGrammar]);
-                combiner.combineMeshes();
-            }
-             
-        }
-
+        //Sauvegarder la configuration
         if(GUILayout.Button("Save configuration")){
             SavePopup popup = ScriptableObject.CreateInstance<SavePopup>();
             if(configName == ""){
@@ -157,37 +136,120 @@ public class LSystemMenu : EditorWindow
             popup.Show();
         }
 
-        if(GUILayout.Button("Afficher Branches")){    
+        DrawUILine(Color.black);
 
-            if (parent == null || points == null || points.Count == 0 || lsystem == null)
-            {
-                Debug.Log("No branches to display");
-            }
-            else
-            {
-                LSystemGen generator = new LSystemGen(lsystem, parent);
-                foreach (INode point in points){
-                    generator.displayBranch((Branche) point, parent);
-                }
-                //vider la liste des points pour ne pas afficher les branches plusieurs fois
-                points.Clear();
-                
+        //Choix de la grammaire
+        numGrammar = EditorGUILayout.Popup("Grammar", numGrammar, files);
 
-            }  
+        if (files[numGrammar].EndsWith(".lsys"))
+        {
+            grammarBool.target = true;
         }
+        else grammarBool.target = false;
 
-        //combiner les meshes
-        if(GUILayout.Button("Combine Meshes")){
-            if (parent == null)
+        //Paramètres grammaire
+        if(EditorGUILayout.BeginFadeGroup(grammarBool.faded)){
+            
+            EditorGUI.indentLevel++;
+            
+            //GUILayout.Label("Thickness");
+            thickness = EditorGUILayout.Slider("thickness", thickness, 0, 1);
+
+            //GUILayout.Label("Length");
+            length = EditorGUILayout.Slider("Length", length, 0, 1);
+
+            //GUILayout.Label("angle");
+            angle = EditorGUILayout.Slider("angle", angle, 0, 360);
+
+            EditorGUI.indentLevel--;
+        }
+        EditorGUILayout.EndFadeGroup();
+
+        //Paramètres Nombre d'itérations
+        GUILayout.Label("nbIteration");
+        nbIteration = EditorGUILayout.IntSlider(nbIteration, 1, 10);
+
+        // side to side toggle buttons
+        GUILayout.BeginHorizontal();
+        
+        GUILayout.Label("AutoDisplay");
+        display.target = EditorGUILayout.Toggle(display.target);
+
+        GUILayout.Label("AutoFuse Meshes");
+        autoFuse.target = EditorGUILayout.Toggle(autoFuse.target);
+    
+        GUILayout.EndHorizontal();
+
+        //EditorGUILayout.Space();       
+
+        if(GUILayout.Button("Generate")){
+            parent = new GameObject();
+            points = new List<INode>();
+
+            lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Coral/L-System/Grammar/" + files[numGrammar]);
+            lsystem.Generate(nbIteration);
+
+            //if extension is .lsys
+            if (files[numGrammar].EndsWith(".lsys"))
             {
-                Debug.Log("No branches to combine");
+                grammarBool.target = false;
+                //traduction de la gammaire lsystemV1 en lsystemV2
+                lsystem.trad(thickness, length, angle);
             }
-            else
+            else grammarBool.target = true;
+        
+            LSystemGen generator = new LSystemGen(lsystem, parent);
+            
+            points = generator.ParseAndPlace(lsystem.current, display.target);
+   
+            if (autoFuse.target && parent != null)
             {
                 MeshCombiner combiner = new MeshCombiner(parent, files[numGrammar]);
                 combiner.combineMeshes();
+            } 
+        }
+
+        //DrawUILine(Color.grey);
+       
+        //Affichage de a structure
+        if(EditorGUILayout.BeginFadeGroup(1 - display.faded)){
+            if(GUILayout.Button("Afficher Branches")){    
+                if (parent == null || points == null || points.Count == 0 || lsystem == null)
+                {
+                    Debug.Log("No branches to display");
+                }
+                else
+                {
+                    LSystemGen generator = new LSystemGen(lsystem, parent);
+                    foreach (INode point in points){
+                        generator.displayBranch((Branche) point, parent);
+                    }
+                    //vider la liste des points pour ne pas afficher les branches plusieurs fois
+                    points.Clear();
+                }  
             }
-        }   
+        }
+        EditorGUILayout.EndFadeGroup();
+
+        //combiner les meshes
+        if(EditorGUILayout.BeginFadeGroup(1 - autoFuse.faded))
+        {
+            if(GUILayout.Button("Combine Meshes")){
+                if (parent == null)
+                {
+                    Debug.Log("No branches to combine");
+                }
+                else
+                {
+                    MeshCombiner combiner = new MeshCombiner(parent, files[numGrammar]);
+                    combiner.combineMeshes();
+                }
+            }
+        }
+        EditorGUILayout.EndFadeGroup();
+
+        EditorGUILayout.EndScrollView();
+        EditorGUILayout.EndVertical();   
     }
 
 
@@ -237,6 +299,16 @@ public class LSystemMenu : EditorWindow
             }
         }
         return res;
+    }
+
+    public static void DrawUILine(Color color, int thickness = 1, int padding = 15)
+    {
+        Rect r = EditorGUILayout.GetControlRect(GUILayout.Height(padding+thickness));
+        r.height = thickness;
+        r.y+=padding/2;
+        r.x-=2;
+        r.width +=6;
+        EditorGUI.DrawRect(r, color);
     }
 
 }

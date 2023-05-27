@@ -36,6 +36,7 @@ public class LConfigSpaceColo {
 
 public class SpaceColonizationMenu : EditorWindow
 {
+    Vector2 scrollPos;
 
     [MenuItem("Coral/Space Colonization")]
     public static void showWindow() {
@@ -62,6 +63,11 @@ public class SpaceColonizationMenu : EditorWindow
 
     void OnGUI()
     {
+        EditorGUILayout.BeginVertical();
+        scrollPos =
+            EditorGUILayout.BeginScrollView(scrollPos);
+
+
         LConfigSpaceColo lConfig = new LConfigSpaceColo();
         if(File.Exists(Application.dataPath + "/Coral/SpaceColonisation/Config.json")){
             lConfig = JsonUtility.FromJson<LConfigSpaceColo>(File.ReadAllText(Application.dataPath + "/Coral/SpaceColonisation/Config.json"));
@@ -170,6 +176,9 @@ public class SpaceColonizationMenu : EditorWindow
             popup.maxSize = new Vector2(200, 90);
             popup.Show();
         }
+
+        EditorGUILayout.EndScrollView();
+        EditorGUILayout.EndVertical();
 
     }
 
