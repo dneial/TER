@@ -107,13 +107,13 @@ public class LSystemMenu : EditorWindow
         //Charger Configurations
         numConfig = EditorGUILayout.Popup("Preset", numConfig, nameLConfig);
 
-        if(GUILayout.Button("Charger la config")){
+        if(GUILayout.Button("Charger le preset")){
             if(numConfig > 0){
                 chargeConfig(lConfig.myConfigs[numConfig-1], files);
             }
         }
 
-        GUILayout.Space(2);
+        GUILayout.Space(5);
 
         //Créer une nouvelle configuration
         EditorGUILayout.BeginHorizontal();
@@ -122,7 +122,7 @@ public class LSystemMenu : EditorWindow
         EditorGUILayout.EndHorizontal();
         
         //Sauvegarder la configuration
-        if(GUILayout.Button("Save configuration")){
+        if(GUILayout.Button("Sauvegarder le preset")){
             SavePopup popup = ScriptableObject.CreateInstance<SavePopup>();
             if(configName == ""){
                 popup.setMsg("Nom de configuration vide !\nEchec de l'enregistrement");

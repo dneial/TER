@@ -63,15 +63,13 @@ public class SpaceColonizationMenu : EditorWindow
 
     void OnGUI()
     {
-        EditorGUILayout.BeginVertical();
-        scrollPos =
-            EditorGUILayout.BeginScrollView(scrollPos);
-
-
+        //récupération des config existantes
         LConfigSpaceColo lConfig = new LConfigSpaceColo();
+        
         if(File.Exists(Application.dataPath + "/Coral/SpaceColonisation/Config.json")){
             lConfig = JsonUtility.FromJson<LConfigSpaceColo>(File.ReadAllText(Application.dataPath + "/Coral/SpaceColonisation/Config.json"));
         }
+        
         string[] nameLConfig = new string[lConfig.myConfigs.Count+1];
 
         nameLConfig[0] = "None";
@@ -81,6 +79,10 @@ public class SpaceColonizationMenu : EditorWindow
             cursor++;
         }
 
+        EditorGUILayout.BeginVertical();
+        scrollPos =  EditorGUILayout.BeginScrollView(scrollPos);
+
+        //charger config
         numConfig = EditorGUILayout.Popup("Pre-Config", numConfig, nameLConfig);
 
         if(GUILayout.Button("Charger la config")){
@@ -88,9 +90,48 @@ public class SpaceColonizationMenu : EditorWindow
                 chargeConfig(lConfig.myConfigs[numConfig-1]);
             }
         }
+        
+        GUILayout.Space(5);
 
-        GUILayout.Label("Config Name");
-        configName = EditorGUILayout.TextField("", configName);
+        //Créer une nouvelle configuration
+        EditorGUILayout.BeginHorizontal();
+        GUILayout.Label("New preset : ");
+        configName = EditorGUILayout.TextField(configName);
+        EditorGUILayout.EndHorizontal();
+
+        //sauvegarder config
+        if(GUILayout.Button("Save configuration")){
+            SavePopup popup = ScriptableObject.CreateInstance<SavePopup>();
+            if(prefab == null){
+                prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonisation/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
+            }
+            if(configName == ""){
+                popup.setMsg("Nom de configuration vide !\nEchec de l'enregistrement");
+            } else if (saveConfig(new ConfigSpaceColo(configName, leaf_influence_radius, leaf_kill_distance,
+            influence_points, thickness, prefab.name, height, max_iterations, new_leaves))){
+                popup.setMsg("Enregistrement réussi");
+            } else {
+                popup.setMsg("Ce nom est déja pris !\nEchec de l'enregistrement");
+            }
+            popup.minSize = new Vector2(200, 90);
+            popup.maxSize = new Vector2(200, 90);
+            popup.Show();
+        }
+
+        LSystemMenu.DrawUILine(Color.black);
+        
+        GUILayout.Label("Paramètres du nuage de points", EditorStyles.boldLabel);
+
+        EditorGUI.indentLevel++;
+            prefab = EditorGUILayout.ObjectField("Volume Prefab", prefab, typeof(GameObject), true) as GameObject;
+            height = EditorGUILayout.Slider("Volume Height", height, 0.1f, 10);
+        EditorGUI.indentLevel--;
+
+        EditorGUILayout.Space();
+
+        GUILayout.Label("Paramètres de Space_Colonization", EditorStyles.boldLabel);
+        
+        EditorGUI.indentLevel++;
 
         GUILayout.Label("Leaf Influence Radius");
         leaf_influence_radius = EditorGUILayout.Slider(leaf_influence_radius, 10, 100);
@@ -101,24 +142,24 @@ public class SpaceColonizationMenu : EditorWindow
         GUILayout.Label("Influence Points");
         influence_points = EditorGUILayout.IntSlider(influence_points, 50, 1000);
 
-        GUILayout.Label("Volume Prefab");
-        prefab = EditorGUILayout.ObjectField(prefab, typeof(GameObject), true) as GameObject;
-
-        GUILayout.Label("Volume Height");
-        height = EditorGUILayout.Slider(height, 0.1f, 10);
-
         GUILayout.Label("Max Iterations");
         max_iterations = EditorGUILayout.IntSlider(max_iterations, 1, 1000);
 
         GUIContent content = new GUIContent("New Leaves", "Number of new leaves to add on each iteration");
-        new_leaves = EditorGUILayout.IntSlider(content, new_leaves, 0, 100);
+        GUILayout.Label(content);
+        new_leaves = EditorGUILayout.IntSlider(new_leaves, 0, 100);
+
+        EditorGUILayout.Space();
 
         thickness.AddKey(0.4f, 0.9f);
         thickness.AddKey(0.3f, 0.8f);
         thickness.AddKey(0.95f, 1);
         thickness.SmoothTangents(3, -1);
         thickness = EditorGUILayout.CurveField("Thickness", thickness);
+        
+        EditorGUI.indentLevel--;
 
+        EditorGUILayout.Space();
       
         if(GUILayout.Button("Generate"))
         {
@@ -159,23 +200,23 @@ public class SpaceColonizationMenu : EditorWindow
             
         }
 
-        if(GUILayout.Button("Save configuration")){
-            SavePopup popup = ScriptableObject.CreateInstance<SavePopup>();
-            if(prefab == null){
-                prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonisation/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
-            }
-            if(configName == ""){
-                popup.setMsg("Nom de configuration vide !\nEchec de l'enregistrement");
-            } else if (saveConfig(new ConfigSpaceColo(configName, leaf_influence_radius, leaf_kill_distance,
-            influence_points, thickness, prefab.name, height, max_iterations, new_leaves))){
-                popup.setMsg("Enregistrement réussi");
-            } else {
-                popup.setMsg("Ce nom est déja pris !\nEchec de l'enregistrement");
-            }
-            popup.minSize = new Vector2(200, 90);
-            popup.maxSize = new Vector2(200, 90);
-            popup.Show();
-        }
+        // if(GUILayout.Button("Save configuration")){
+        //     SavePopup popup = ScriptableObject.CreateInstance<SavePopup>();
+        //     if(prefab == null){
+        //         prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonisation/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
+        //     }
+        //     if(configName == ""){
+        //         popup.setMsg("Nom de configuration vide !\nEchec de l'enregistrement");
+        //     } else if (saveConfig(new ConfigSpaceColo(configName, leaf_influence_radius, leaf_kill_distance,
+        //     influence_points, thickness, prefab.name, height, max_iterations, new_leaves))){
+        //         popup.setMsg("Enregistrement réussi");
+        //     } else {
+        //         popup.setMsg("Ce nom est déja pris !\nEchec de l'enregistrement");
+        //     }
+        //     popup.minSize = new Vector2(200, 90);
+        //     popup.maxSize = new Vector2(200, 90);
+        //     popup.Show();
+        // }
 
         EditorGUILayout.EndScrollView();
         EditorGUILayout.EndVertical();
