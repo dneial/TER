@@ -1,11 +1,35 @@
-variables : A, B, C, D
+variables : A, B, C, D, E, Z
 constants : +, -, [, ]
 start : A
 angle : 25
 
 rules :
-A = B[-A][+A]C
-B = D[+B]D[-B]D
-C = CC
-D = D
+
+A = AZ[+BA][-AB]
+
+B (0,33) = &&BZZ[+BZ][-BZ]
+B (0,33) = &&ZZ[+BZ]
+B (0,33) = &&ZZ[-BZ]
+
+
+Z = Z
+
+#A = [--B]C[+E]
+#B = B[+C]
+#C = A[-C][+D]
+#D = B-A
+#E = E[--C][+B]
+#
+#F -> F[+F]F[-F]F (Branching rule)
+#G -> G[+G][-G] (Branching rule)
+#
+#             |   |  |/ 
+#         _|  | / |/ |
+#           \ \/  |  /  |
+#        \  _\_\  / /__/
+#        _\__/  \/ /   \
+#                \/
+#                /
+#               |
+
 

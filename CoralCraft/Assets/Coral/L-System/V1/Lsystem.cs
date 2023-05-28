@@ -25,6 +25,29 @@ public class Lsystem {
         this.angle = angle;
     }
 
+    public Rule getProbarule(char c)
+    {
+        //choose a rule based on its probability
+
+        float sum = 0f;
+        foreach (Rule rule in rules[c])
+        {
+            sum += rule.getProbability();
+        }
+
+        float rnd = UnityEngine.Random.Range(0, sum);
+
+        foreach (Rule rule in rules[c])
+        {
+            if(rnd < rule.getProbability()){
+                return rule;
+            }
+            rnd -= rule.getProbability();
+        }
+        Debug.Log("erreur de proba");
+        return rules[c][0];
+    }
+
     public void Generate(int n = 1)
     {
         for (int i = 0; i < n; i++)
@@ -35,18 +58,9 @@ public class Lsystem {
                 char c = current[j];
                 if (rules.ContainsKey(c))
                 {
-                    //choose a rule based on its probability
-                    float r = UnityEngine.Random.value;
-                    float sum = 0f;
-                    foreach (Rule rule in rules[c])
-                    {
-                        sum += rule.getProbability();
-                        if (r <= sum)
-                        {
-                            next += rule.getRule();
-                            break;
-                        }
-                    }
+                    //choose a rule based on its probability                    
+                    next += getProbarule(c).getRule();
+                    
                 }
                 else
                 {
@@ -57,7 +71,7 @@ public class Lsystem {
             // Debug.Log("current = " + current);
         }
 
-        //Debug.Log("generated string = " + current);
+        Debug.Log("generated string = " + current);
     }
 
 

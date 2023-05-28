@@ -53,19 +53,19 @@ public class LSystemMenu : EditorWindow
     static string configName = "";
     int numGrammar;
 
-    AnimBool display;
-    AnimBool autoFuse;
-    AnimBool grammarBool;
+    AnimBool display = new AnimBool(true);
+    AnimBool autoFuse = new AnimBool(true);
+    AnimBool grammarBool = new AnimBool(true);
 
     // pour cacher/afficher des actions dans le menu
     private void OnEnable() {
-        display = new AnimBool(true);
+        // display = new AnimBool(true);
         display.valueChanged.AddListener(Repaint);
 
-        autoFuse = new AnimBool(true);
+        // autoFuse = new AnimBool(true);
         autoFuse.valueChanged.AddListener(Repaint);
 
-        grammarBool = new AnimBool(true);
+        // grammarBool = new AnimBool(true);
         grammarBool.valueChanged.AddListener(Repaint);
     }
 
@@ -101,8 +101,13 @@ public class LSystemMenu : EditorWindow
             cursor++;
         }
 
+
+        //DEBUT GUI
+
         EditorGUILayout.BeginVertical();
         scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+
+        GUILayout.Space(5);
 
         //Charger Configurations
         numConfig = EditorGUILayout.Popup("Preset", numConfig, nameLConfig);
@@ -117,7 +122,7 @@ public class LSystemMenu : EditorWindow
 
         //Créer une nouvelle configuration
         EditorGUILayout.BeginHorizontal();
-        GUILayout.Label("New preset : ");
+        GUILayout.Label("Nouveau preset : ");
         configName = EditorGUILayout.TextField(configName);
         EditorGUILayout.EndHorizontal();
         
@@ -125,7 +130,7 @@ public class LSystemMenu : EditorWindow
         if(GUILayout.Button("Sauvegarder le preset")){
             SavePopup popup = ScriptableObject.CreateInstance<SavePopup>();
             if(configName == ""){
-                popup.setMsg("Nom de configuration vide !\nEchec de l'enregistrement");
+                popup.setMsg("Nom de preset vide !\nEchec de l'enregistrement");
             } else if (saveConfig(new ConfigLSys(thickness, length, configName, nbIteration, angle, files[numGrammar]))){
                 popup.setMsg("Enregistrement réussi");
             } else {
@@ -139,7 +144,7 @@ public class LSystemMenu : EditorWindow
         DrawUILine(Color.black);
 
         //Choix de la grammaire
-        numGrammar = EditorGUILayout.Popup("Grammar", numGrammar, files);
+        numGrammar = EditorGUILayout.Popup("Grammaire", numGrammar, files);
 
         if (files[numGrammar].EndsWith(".lsys"))
         {
@@ -153,13 +158,13 @@ public class LSystemMenu : EditorWindow
             EditorGUI.indentLevel++;
             
             //GUILayout.Label("Thickness");
-            thickness = EditorGUILayout.Slider("thickness", thickness, 0, 1);
+            thickness = EditorGUILayout.Slider("Épaisseur", thickness, 0, 1);
 
             //GUILayout.Label("Length");
-            length = EditorGUILayout.Slider("Length", length, 0, 1);
+            length = EditorGUILayout.Slider("Longueur", length, 0, 1);
 
             //GUILayout.Label("angle");
-            angle = EditorGUILayout.Slider("angle", angle, 0, 360);
+            angle = EditorGUILayout.Slider("Angle", angle, 0, 360);
 
             EditorGUI.indentLevel--;
         }
@@ -172,17 +177,17 @@ public class LSystemMenu : EditorWindow
         // side to side toggle buttons
         GUILayout.BeginHorizontal();
         
-        GUILayout.Label("AutoDisplay");
+        GUILayout.Label("Affichage Auto");
         display.target = EditorGUILayout.Toggle(display.target);
 
-        GUILayout.Label("AutoFuse Meshes");
+        GUILayout.Label("Fusion Auto");
         autoFuse.target = EditorGUILayout.Toggle(autoFuse.target);
     
         GUILayout.EndHorizontal();
 
-        //EditorGUILayout.Space();       
+        EditorGUILayout.Space();       
 
-        if(GUILayout.Button("Generate")){
+        if(GUILayout.Button("Générer")){
             parent = new GameObject();
             points = new List<INode>();
 
@@ -202,10 +207,11 @@ public class LSystemMenu : EditorWindow
             
             points = generator.ParseAndPlace(lsystem.current, display.target);
    
-            if (autoFuse.target && parent != null)
+            if (display.target && autoFuse.target && parent != null)
             {
                 MeshCombiner combiner = new MeshCombiner(parent, files[numGrammar]);
                 combiner.combineMeshes();
+                parent = combiner.getCombinedMesh().gameObject;
             } 
         }
 
@@ -213,10 +219,10 @@ public class LSystemMenu : EditorWindow
        
         //Affichage de a structure
         if(EditorGUILayout.BeginFadeGroup(1 - display.faded)){
-            if(GUILayout.Button("Afficher Branches")){    
+            if(GUILayout.Button("Afficher Corail")){    
                 if (parent == null || points == null || points.Count == 0 || lsystem == null)
                 {
-                    Debug.Log("No branches to display");
+                    Debug.Log("Aucun corail à afficher");
                 }
                 else
                 {
@@ -226,6 +232,14 @@ public class LSystemMenu : EditorWindow
                     }
                     //vider la liste des points pour ne pas afficher les branches plusieurs fois
                     points.Clear();
+
+                    if (autoFuse.target)
+                    {
+                        MeshCombiner combiner = new MeshCombiner(parent, files[numGrammar]);
+                        combiner.combineMeshes();
+                        parent = combiner.getCombinedMesh().gameObject;
+                    }
+                
                 }  
             }
         }
@@ -234,10 +248,14 @@ public class LSystemMenu : EditorWindow
         //combiner les meshes
         if(EditorGUILayout.BeginFadeGroup(1 - autoFuse.faded))
         {
-            if(GUILayout.Button("Combine Meshes")){
+            if(GUILayout.Button("Fusionner Objets")){
                 if (parent == null)
                 {
-                    Debug.Log("No branches to combine");
+                    Debug.Log("Aucun objet à fusionner");
+                }
+                else if (parent.transform.childCount == 0)
+                {
+                    Debug.Log("veuillez d'abord afficher le corail généré");
                 }
                 else
                 {

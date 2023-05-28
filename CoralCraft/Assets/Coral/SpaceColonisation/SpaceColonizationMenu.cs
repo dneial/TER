@@ -45,7 +45,6 @@ public class SpaceColonizationMenu : EditorWindow
     }
 
 
-
     static float leaf_influence_radius = 1f;
     static float leaf_kill_distance = 1f;
     static int influence_points = 100;
@@ -79,13 +78,17 @@ public class SpaceColonizationMenu : EditorWindow
             cursor++;
         }
 
+        //DEBUT GUI
+
         EditorGUILayout.BeginVertical();
         scrollPos =  EditorGUILayout.BeginScrollView(scrollPos);
 
-        //charger config
-        numConfig = EditorGUILayout.Popup("Pre-Config", numConfig, nameLConfig);
+        GUILayout.Space(5);
 
-        if(GUILayout.Button("Charger la config")){
+        //charger config
+        numConfig = EditorGUILayout.Popup("Preset", numConfig, nameLConfig);
+
+        if(GUILayout.Button("Charger le preset")){
             if(numConfig > 0){
                 chargeConfig(lConfig.myConfigs[numConfig-1]);
             }
@@ -95,18 +98,18 @@ public class SpaceColonizationMenu : EditorWindow
 
         //Créer une nouvelle configuration
         EditorGUILayout.BeginHorizontal();
-        GUILayout.Label("New preset : ");
+        GUILayout.Label("Nouveau preset");
         configName = EditorGUILayout.TextField(configName);
         EditorGUILayout.EndHorizontal();
 
         //sauvegarder config
-        if(GUILayout.Button("Save configuration")){
+        if(GUILayout.Button("Sauvegarder le preset")){
             SavePopup popup = ScriptableObject.CreateInstance<SavePopup>();
             if(prefab == null){
                 prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonisation/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
             }
             if(configName == ""){
-                popup.setMsg("Nom de configuration vide !\nEchec de l'enregistrement");
+                popup.setMsg("Nom de preset vide !\nEchec de l'enregistrement");
             } else if (saveConfig(new ConfigSpaceColo(configName, leaf_influence_radius, leaf_kill_distance,
             influence_points, thickness, prefab.name, height, max_iterations, new_leaves))){
                 popup.setMsg("Enregistrement réussi");
@@ -121,32 +124,38 @@ public class SpaceColonizationMenu : EditorWindow
         LSystemMenu.DrawUILine(Color.black);
         
         GUILayout.Label("Paramètres du nuage de points", EditorStyles.boldLabel);
-
-        EditorGUI.indentLevel++;
-            prefab = EditorGUILayout.ObjectField("Volume Prefab", prefab, typeof(GameObject), true) as GameObject;
-            height = EditorGUILayout.Slider("Volume Height", height, 0.1f, 10);
-        EditorGUI.indentLevel--;
-
         EditorGUILayout.Space();
 
+        EditorGUI.indentLevel++;
+            prefab = EditorGUILayout.ObjectField("Forme du volume", prefab, typeof(GameObject), true) as GameObject;
+            height = EditorGUILayout.Slider("Hauteur du volume", height, 0.1f, 10);
+        EditorGUI.indentLevel--;
+
+        LSystemMenu.DrawUILine(Color.black);
+
         GUILayout.Label("Paramètres de Space_Colonization", EditorStyles.boldLabel);
+        EditorGUILayout.Space();
         
         EditorGUI.indentLevel++;
 
-        GUILayout.Label("Leaf Influence Radius");
-        leaf_influence_radius = EditorGUILayout.Slider(leaf_influence_radius, 10, 100);
-
-        GUILayout.Label("Leaf Kill Distance");
-        leaf_kill_distance = EditorGUILayout.Slider(leaf_kill_distance, 1, 10);
-
-        GUILayout.Label("Influence Points");
+        GUIContent contentInf = new GUIContent("Points d'influence", "Nombre de points d'influence de départ");
+        GUILayout.Label(contentInf);
         influence_points = EditorGUILayout.IntSlider(influence_points, 50, 1000);
 
-        GUILayout.Label("Max Iterations");
+        GUIContent contentRay = new GUIContent("Rayon d'influence", "Rayon d'action des points d'influence");
+        GUILayout.Label(contentRay);
+        leaf_influence_radius = EditorGUILayout.Slider(leaf_influence_radius, 10, 100);
+
+        GUIContent contentLim = new GUIContent("Distance limite", "Distance à partir de laquelle les points d'influence sont détruits");
+        GUILayout.Label(contentLim);
+        leaf_kill_distance = EditorGUILayout.Slider(leaf_kill_distance, 1, 10);
+
+        GUIContent contentMax = new GUIContent("Nombre d'itérations maximales", "limite du nombre d'itérations de l'algorithme");
+        GUILayout.Label(contentMax);
         max_iterations = EditorGUILayout.IntSlider(max_iterations, 1, 1000);
 
-        GUIContent content = new GUIContent("New Leaves", "Number of new leaves to add on each iteration");
-        GUILayout.Label(content);
+        GUIContent contentNew = new GUIContent("Nouveaux points", "Nombre de points d'influence à rajouter à chaque iteration");
+        GUILayout.Label(contentNew);
         new_leaves = EditorGUILayout.IntSlider(new_leaves, 0, 100);
 
         EditorGUILayout.Space();
@@ -155,13 +164,14 @@ public class SpaceColonizationMenu : EditorWindow
         thickness.AddKey(0.3f, 0.8f);
         thickness.AddKey(0.95f, 1);
         thickness.SmoothTangents(3, -1);
-        thickness = EditorGUILayout.CurveField("Thickness", thickness);
+        GUIContent contentThic = new GUIContent("Épaisseur", "Courbe d'évolution de l'épaisseur des segments");
+        thickness = EditorGUILayout.CurveField(contentThic, thickness);
         
         EditorGUI.indentLevel--;
 
         EditorGUILayout.Space();
       
-        if(GUILayout.Button("Generate"))
+        if(GUILayout.Button("Générer"))
         {
             if(prefab == null)
             {
@@ -186,11 +196,11 @@ public class SpaceColonizationMenu : EditorWindow
             generator.Generate(max_iterations, new_leaves);
             this.view.update(this.generator.GetNodes(), thickness);
             
-            Debug.Log("Generated after " + generator.steps + " steps");
+            Debug.Log("Génération après " + generator.steps + " étapes");
 
             if (this.view.GetRoot() == null)
             {
-                Debug.Log("No branches to combine");
+                Debug.Log("Aucun objet à fusionner");
             }
             else
             {
