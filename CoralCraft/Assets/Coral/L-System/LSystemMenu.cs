@@ -73,7 +73,7 @@ public class LSystemMenu : EditorWindow
     void OnGUI()
     {
         //récupérer les fichiers de grammaire
-        string[] tmp = Directory.GetFiles(Application.dataPath + "/Coral/L-System/Grammar/", "*.lsys?");
+        string[] tmp = Directory.GetFiles(Application.dataPath + "/Coral/L-System/Grammars/", "*.lsys?");
 
         //trier les fichiers par ordre de leur extension
         string[] files = sortbyExt(tmp);
@@ -191,7 +191,7 @@ public class LSystemMenu : EditorWindow
             parent = new GameObject();
             points = new List<INode>();
 
-            lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Coral/L-System/Grammar/" + files[numGrammar]);
+            lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Coral/L-System/Grammars/" + files[numGrammar]);
             lsystem.Generate(nbIteration);
 
             //if extension is .lsys
@@ -265,6 +265,32 @@ public class LSystemMenu : EditorWindow
             }
         }
         EditorGUILayout.EndFadeGroup();
+
+
+        DrawUILine(Color.black);
+
+        if(GUILayout.Button("Étape par étape"))
+        {
+            points = new List<INode>();
+
+            lsystem = LsystemInterpretor.ParseFile(Application.dataPath + "/Coral/L-System/Grammars/" + files[numGrammar]);
+            lsystem.Generate(nbIteration);
+
+            //if extension is .lsys
+            if (files[numGrammar].EndsWith(".lsys"))
+            {
+                grammarBool.target = false;
+                //traduction de la gammaire lsystemV1 en lsystemV2
+                lsystem.trad(thickness, length, angle);
+            }
+            else grammarBool.target = true;
+
+            //on a la chaine de caractères
+            
+            Demo = new LSystemDemo(lsystem);
+
+            Demo.initDemo();
+        }
 
         EditorGUILayout.EndScrollView();
         EditorGUILayout.EndVertical();   
