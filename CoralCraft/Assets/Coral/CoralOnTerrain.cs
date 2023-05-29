@@ -175,7 +175,7 @@ public class CoralOnTerrain : EditorWindow
 
                 LSystemGen generator = new LSystemGen(lsystem, parent);
                 generator.ParseAndPlace(lsystem.current, true);
-                if(parent.transform.GetChild(0).position.y > parent.transform.GetChild(1).position.y){
+                if(grammar == 2){
                     parent.transform.Rotate(Vector3.right, 180);
                 }
                 return parent;
