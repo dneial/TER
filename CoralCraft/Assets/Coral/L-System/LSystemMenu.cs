@@ -287,9 +287,14 @@ public class LSystemMenu : EditorWindow
 
             //on a la chaine de caractères
             
-            Demo = new LSystemDemo(lsystem);
+            //load fbx
 
-            Demo.initDemo();
+            GameObject turtleprefab = AssetDatabase.LoadAssetAtPath("Assets/Resources/Turtle/turtle.fbx", typeof(GameObject)) as GameObject;
+            Debug.Log(turtleprefab);
+            GameObject turtle = Instantiate(turtleprefab, new Vector3(0, 0, 0), Quaternion.identity);
+            //add script to turtle
+            turtle.gameObject.AddComponent<Turtle>();
+            turtle.GetComponent<Turtle>().production = lsystem.current;
         }
 
         EditorGUILayout.EndScrollView();

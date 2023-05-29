@@ -1,3 +1,6 @@
+using UnityEngine;
+using UnityEditor;
+
 public class TurtleState
 {
     public float heading { get; set; }
@@ -6,8 +9,8 @@ public class TurtleState
     public float radius { get; set; }
     public float step { get; set; }
 
-    private vector3 position { get; set; } 
-    private vector3 direction { get; set; }
+    public Vector3 position { get; set; } 
+    public Vector3 direction { get; set; }
 
     public TurtleState()
     {
@@ -18,7 +21,7 @@ public class TurtleState
         this.step = 0;
 
         this.position = new Vector3(0, 0, 0);
-        this.direction = new Vector3(0, 1, 0);
+        this.direction = new Vector3(0, 0, 0);
     }
 
     public TurtleState(float heading, float pitch, float roll, float radius, float step, Vector3 position, Vector3 direction)
@@ -45,5 +48,5 @@ public class TurtleState
         this.direction = turtleState.direction;
     }
 
-    
+
 }
