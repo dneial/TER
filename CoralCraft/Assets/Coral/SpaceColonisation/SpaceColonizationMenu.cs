@@ -16,7 +16,9 @@ public struct ConfigSpaceColo {
     public int new_leaves;
 
     public ConfigSpaceColo(string name, float leaf_influence_radius, float leaf_kill_distance,
-    int influence_points, AnimationCurve thickness, string prefab, float height, int max_iterations, int new_leaves){
+                           int influence_points, AnimationCurve thickness, string prefab, 
+                           float height, int max_iterations, int new_leaves)
+    {
         this.name = name;
         this.leaf_influence_radius = leaf_influence_radius;
         this.leaf_kill_distance = leaf_kill_distance;
@@ -49,19 +51,29 @@ public class SpaceColonizationMenu : EditorWindow
     static float leaf_kill_distance = 1f;
     static int influence_points = 100;
     static AnimationCurve thickness = AnimationCurve.EaseInOut(0,0.35f,1,1);
-    static GameObject prefab;
+    static GameObject prefab = null;
     static float height = 10f;
+    static float scale = 1f;
     static int max_iterations = 1000;
     static int new_leaves = 5;
     static int numConfig;
     static string configName = "";
 
+
     private SpaceColonization generator;
     private SpaceColonizationView view;
+    private GameObject root = null;
+    private GameObject vol = null;
 
 
     void OnGUI()
     {
+        if(root == null){
+            root = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            root.name = "Space Colonization Root";
+        }
+
+
         //récupération des config existantes
         LConfigSpaceColo lConfig = new LConfigSpaceColo();
         
@@ -127,13 +139,40 @@ public class SpaceColonizationMenu : EditorWindow
         EditorGUILayout.Space();
 
         EditorGUI.indentLevel++;
-            prefab = EditorGUILayout.ObjectField("Forme du volume", prefab, typeof(GameObject), true) as GameObject;
-            height = EditorGUILayout.Slider("Hauteur du volume", height, 0.1f, 10);
+
+        GameObject setPrefab = EditorGUILayout.ObjectField("Forme du volume", prefab, typeof(GameObject), true) as GameObject;
+        if(setPrefab != prefab || this.vol == null){
+            prefab = setPrefab;
+            Debug.Log(prefab);
+            if(prefab != null && this.vol == null) {
+                prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonisation/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
+                this.vol = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
+                if(this.vol.GetComponent<MeshCollider>() == null)
+                {
+                    // Debug.Log("No mesh collider found, adding one");
+                    this.vol.AddComponent<MeshCollider>();
+                }
+                Debug.Log(this.vol);
+            }
+        } else {
+            Debug.Log("prefab not changed");
+        }
+
+        
+
+        height = EditorGUILayout.Slider("Hauteur du volume", height, 0.1f, 10f);
+
+        float newScale = EditorGUILayout.Slider("Echelle du volume", scale, 0.5f, 1.5f);
+        if(scale != newScale){
+            scale = newScale;
+            this.vol.transform.localScale = this.vol.transform.localScale * scale;
+        }
+
         EditorGUI.indentLevel--;
 
         LSystemMenu.DrawUILine(Color.black);
 
-        GUILayout.Label("Paramètres de Space_Colonization", EditorStyles.boldLabel);
+        GUILayout.Label("Paramètres de Space Colonization", EditorStyles.boldLabel);
         EditorGUILayout.Space();
         
         EditorGUI.indentLevel++;
@@ -173,27 +212,18 @@ public class SpaceColonizationMenu : EditorWindow
       
         if(GUILayout.Button("Générer"))
         {
-            if(prefab == null)
-            {
-                prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonisation/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
-            }
-
-            GameObject go = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
-            
-            if(go.GetComponent<MeshCollider>() == null)
-            {
-                // Debug.Log("No mesh collider found, adding one");
-                go.AddComponent<MeshCollider>();
-            }
-            
-            Bounds bounds = go.GetComponent<MeshCollider>().bounds;
+            Bounds bounds = this.vol.GetComponent<MeshCollider>().bounds;
+            Debug.Log("Bounds : " + bounds.ToString());
             
             generator = new SpaceColonization(bounds, leaf_kill_distance, leaf_influence_radius, influence_points);
             view = new SpaceColonizationView();
 
-            DestroyImmediate(go);
 
             generator.Generate(max_iterations, new_leaves);
+            DestroyImmediate(this.vol);
+            scale = 1f;
+
+
             this.view.update(this.generator.GetNodes(), thickness);
             
             Debug.Log("Génération après " + generator.steps + " étapes");
