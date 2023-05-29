@@ -297,4 +297,161 @@ public class LSystemGen
         }
     } 
 
+    //fonction de création du corail étape par étape
+        // on à besion d'une "tortue" qui va se déplacer dans l'espace et montrer l'effet de chaque interprétation de caractère +
+        // on à besoin d'afficher les branches au fur et à mesure du déplacement de la tortue
+        // on a besoin de voir à quelle étape de l'interprétation on se trouve 
+            // un menu unity qui se met à jour à chaque étape ?
+            // qui affiche la chaine de cractère générée avec un pointeur sur où on en est?
+    
+    public List<INode> stepByStep(string current){
+
+        //création de la turtle et placement sur la racine
+        Turtle turtle = new Turtle(this.parent.transform.position, this.parent.transform.rotation.eulerAngles);
+
+        //default values
+        BranchState currentState = new BranchState( 0f, 0f, 0f, 0.1f, 1f, 0f);
+        stateStack.Push(new BranchState(currentState));
+        
+        //split the string by spaces
+        string[] words = current.Split(' ');
+
+        //for each word do the appropriate action
+        
+        //if the first character is h, p, r or R update the heading, pitch, roll or Radius
+        //if the first character is F, move forward
+        //if the first character is [, push the current state
+        //if the first character is ], pop the current state
+
+        foreach (string word in words)
+        {
+            if(word == "")
+            {
+                //Debug.Log("empty word");
+            }
+            else if (word[0] == 'h')
+            {
+                //update heading
+                currentState.heading += valueParse(word.Substring(1));
+            }
+            else if (word[0] == 'p')
+            {
+                //update pitch
+                currentState.pitch += valueParse(word.Substring(1));
+            }
+            else if (word[0] == 'r')
+            {
+                //update roll
+                currentState.roll += valueParse(word.Substring(1));
+            }
+            else if (word[0] == 'R')
+            {
+                //change radius
+                currentState.radius = valueParse(word.Substring(1));
+            }
+            else if (word[0] == 'F')
+            {
+                //move forward
+                //if there are parameters after the F, use them
+                if (word.Length != 1)
+                {
+                    currentState.step = valueParse(word.Substring(1));                
+                }
+                
+                //create a new instance of Branche EACH TIME
+                Branche b;
+                
+                if (stackBranches.Count == 0) {
+                    //create first branch from gameobject position
+                    b = new Branche(++nbBranches, parent.transform.position);
+                }
+                else {
+                    //create branch from last branch
+                    b = new Branche(++nbBranches, stackBranches.Peek());
+                }
+
+                b.setState(new BranchState(currentState));
+                calculatePosition(b);
+
+                if(displayOn)
+                {
+                    displayBranch(b, parent);
+                }
+
+                //add the branch to the list
+                branches.Add(b);
+
+                //add the branch to the stack
+                //Debug.Log("pushing new branch : " + b.id);
+                stackBranches.Push(b);
+
+            }
+            else if (word[0] == '[')
+            {
+                //Debug.Log("pushing state : " + currentState + "");
+                //push the current state
+                stateStack.Push(new BranchState(currentState));
+
+                //on va voir si ça casse tout : 
+                //on push la dernière branche créée avant le branchement
+                stackNodes.Push(stackBranches.Peek());
+            }
+            else if (word[0] == ']')
+            {
+                //pop the current state
+                currentState.update(stateStack.Pop());
+
+                //après ']', le prochain F doit avoir pour origine la dernière branche créée avant le branchement
+                //c'est à dire celle qu'on a push dans stackNodes
+                //on pop toutes les branches jusqu'à ce qu'on tombe sur la dernière branche créée avant le branchement
+                //PUIS on pop le noeud, au pire on le remettra dans stockNodes si on retombe sur '['
+
+                while (stackBranches.Peek().id > stackNodes.Peek().id)
+                {
+                    stackBranches.Pop();
+                }
+                //on devrait pouvoir retomber sur nos pattes avec ça inchallah hein
+
+                //on pop le noeud du coup
+                stackNodes.Pop();
+                                
+            }
+            else if(lsystem.variables.Contains(word[0].ToString()))
+            {
+                //si c'est une variable qui n'a pas été interprétée on fait rien ?
+                //Debug.Log("variable non interprétée dans cette itération : " + word[0]);
+            }
+            else
+            {
+                Debug.Log("ERREUR ? : " + word[0]);
+            }
+
+            //si le mot est le dernier de la chaine ou ']', on arrondit le bout de la branche
+            if (displayOn && word != "" && (word == words[words.Length - 1] || word == "]" || word == "] "))
+            {
+                //dernière branche créée :
+                Branche tmp = stackBranches.Peek();
+                Vector3 pos = tmp.getGPosition();
+                Vector3 rota = tmp.getGRotation();
+
+                //son extremité
+                Vector3 branchEnd = pos + Quaternion.Euler(rota.x, rota.y, rota.z) *
+                                        Vector3.up *
+                                        (tmp.branchState.step/2);
+                
+                //on place la sphère
+                //placeSphere(tmp, branchEnd, rota);
+            }
+            
+        }
+
+        //clear all stacks
+        stackBranches.Clear();
+        stackNodes.Clear();
+        stateStack.Clear();
+
+        //return the list of branches
+        return branches;
+    }
+
 }
