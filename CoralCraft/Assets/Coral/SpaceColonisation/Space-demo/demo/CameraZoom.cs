@@ -29,10 +29,16 @@ public class CameraZoom : MonoBehaviour
 
 
         if(Input.GetKeyDown(KeyCode.Z)) {
-            transform.position = new Vector3(transform.position.x, transform.position.y+1, transform.position.z);
+            transform.position = new Vector3(transform.position.x, transform.position.y+0.5f, transform.position.z);
         }
         if(Input.GetKeyDown(KeyCode.S)) {
-            transform.position = new Vector3(transform.position.x, transform.position.y-1, transform.position.z);
+            transform.position = new Vector3(transform.position.x, transform.position.y-0.5f, transform.position.z);
+        }
+        if(Input.GetKeyDown(KeyCode.Q)) {
+            transform.position = new Vector3(transform.position.x-0.5f, transform.position.y, transform.position.z);
+        }
+        if(Input.GetKeyDown(KeyCode.D)) {
+            transform.position = new Vector3(transform.position.x+0.5f, transform.position.y, transform.position.z);
         }
     }
 }

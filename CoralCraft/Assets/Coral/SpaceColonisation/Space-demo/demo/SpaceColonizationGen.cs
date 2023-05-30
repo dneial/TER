@@ -77,7 +77,7 @@ public class SpaceColonizationGen : MonoBehaviour
                     case 1:
                         Debug.Log("Growing");
                         nodes = this.generator.Grow2(new_leaves_per_step);
-                        etape++;
+                        etape = 0;
                         break;
                     case 2:
                         Debug.Log("Linking");

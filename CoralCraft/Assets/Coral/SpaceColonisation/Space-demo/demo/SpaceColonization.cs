@@ -159,13 +159,15 @@ namespace demo {
         private Color GenerateColor(int i, int nb){
             float r = (float)i / (float)nb;
             float g = 1 - r;
-            float b = 0.5f;
+            float b = Random.Range(0.0f, 1.0f);
             return new Color(r, g, b);
         }
         
 
-
         private void clear_colors(){
+            foreach(Node node in this.nodes){
+                node.gameObject.GetComponent<Renderer>().material.SetColor("_Color", Color.white);
+            }
             foreach(Leaf leaf in this.leaves){
                 leaf.gameObject.GetComponent<Renderer>().material.SetColor("_Color", Color.white);
             }
@@ -181,7 +183,7 @@ namespace demo {
             {
                 node = this.nodes[i];
                 if(node.isInfluenced) {
-                    node.direction /= node.influences.Count + 1;
+                    node.direction /= node.influences.Count;
                     node.direction.Normalize();
                     node.influences = new List<Leaf>();
                     node.isInfluenced = false;

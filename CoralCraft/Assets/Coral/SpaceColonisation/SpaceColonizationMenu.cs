@@ -58,6 +58,7 @@ public class SpaceColonizationMenu : EditorWindow
     static int new_leaves = 5;
     static int numConfig;
     static string configName = "";
+    static bool placeVol = false;
 
 
     private SpaceColonization generator;
@@ -141,14 +142,16 @@ public class SpaceColonizationMenu : EditorWindow
         EditorGUI.indentLevel++;
 
         GameObject setPrefab = EditorGUILayout.ObjectField("Forme du volume", prefab, typeof(GameObject), true) as GameObject;
-        if(setPrefab != prefab || this.vol == null){
+        if(setPrefab != null)
+        {
             prefab = setPrefab;
-            if(prefab != null && this.vol == null) {
-                prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonisation/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
+        }
+
+        if(GUILayout.Button("Placer le volume")) {
+            if(this.vol == null) {
                 this.vol = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
                 if(this.vol.GetComponent<MeshCollider>() == null)
                 {
-                    // Debug.Log("No mesh collider found, adding one");
                     this.vol.AddComponent<MeshCollider>();
                 }
                 Debug.Log(this.vol);
