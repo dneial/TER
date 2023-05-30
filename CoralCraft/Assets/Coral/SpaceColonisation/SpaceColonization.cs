@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
+using UnityEditor;
 
 public class SpaceColonization
 {
@@ -50,8 +51,8 @@ public class SpaceColonization
     {
         this.start();
         while(!this.done && this.steps < max_iterations) {
-            this.leaves.AddRange(this.PlaceLeaves(new_leaves_per_iteration));
             this.Grow();
+            this.leaves.AddRange(this.PlaceLeaves(new_leaves_per_iteration));
         }
         this.NormalizeThickness();
     }

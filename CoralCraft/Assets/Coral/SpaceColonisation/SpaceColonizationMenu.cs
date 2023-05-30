@@ -143,7 +143,6 @@ public class SpaceColonizationMenu : EditorWindow
         GameObject setPrefab = EditorGUILayout.ObjectField("Forme du volume", prefab, typeof(GameObject), true) as GameObject;
         if(setPrefab != prefab || this.vol == null){
             prefab = setPrefab;
-            Debug.Log(prefab);
             if(prefab != null && this.vol == null) {
                 prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonisation/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
                 this.vol = Instantiate(prefab, new Vector3(0, height, 0), Quaternion.identity);
@@ -154,18 +153,21 @@ public class SpaceColonizationMenu : EditorWindow
                 }
                 Debug.Log(this.vol);
             }
-        } else {
-            Debug.Log("prefab not changed");
         }
-
         
 
-        height = EditorGUILayout.Slider("Hauteur du volume", height, 0.1f, 10f);
+        float newHeight = EditorGUILayout.Slider("Hauteur du volume", height, 0.1f, 20f);
+
+        if(this.vol != null && newHeight != height){
+            height = newHeight;
+            this.vol.transform.position = new Vector3(0, height, 0);
+        }
 
         float newScale = EditorGUILayout.Slider("Echelle du volume", scale, 0.5f, 1.5f);
-        if(scale != newScale){
+        if(scale != newScale && this.vol != null){
+            Debug.Log("scale: " + this.vol.transform.localScale + ' ' + newScale + ' ' + this.vol.transform.localScale * newScale);
             scale = newScale;
-            this.vol.transform.localScale = this.vol.transform.localScale * scale;
+            this.vol.transform.localScale = Vector3.one * scale;
         }
 
         EditorGUI.indentLevel--;
@@ -220,9 +222,9 @@ public class SpaceColonizationMenu : EditorWindow
 
 
             generator.Generate(max_iterations, new_leaves);
+
             DestroyImmediate(this.vol);
             scale = 1f;
-
 
             this.view.update(this.generator.GetNodes(), thickness);
             
