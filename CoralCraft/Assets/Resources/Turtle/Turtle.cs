@@ -77,17 +77,17 @@ public class Turtle : MonoBehaviour
         GameObject segment = new GameObject();
         
         GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        cylinder.transform.rotation = Quaternion.Euler(90, 0, 0);
+        cylinder.transform.rotation = Quaternion.Euler(0, 0, 0);
         cylinder.transform.localScale = new Vector3(radius, distance / 2, radius);
         cylinder.transform.parent = segment.transform;
 
         //place the new segment between the previous position and the new one
-        segment.transform.position = (this.transform.position + transform.forward * distance / 2);
+        segment.transform.position = (this.transform.position + transform.up * distance / 2);
         segment.transform.parent = racine.transform;
         segment.transform.rotation = this.transform.rotation;
 
-        this.transform.position += transform.forward * distance;
-        position += transform.forward * distance;
+        this.transform.position += transform.up * distance;
+        position += transform.up * distance;
 
         //place a sphere at the end of the segment
         GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -104,21 +104,22 @@ public class Turtle : MonoBehaviour
 
     public void changeHead(float angle)
     {
-        this.transform.rotation = Quaternion.Euler(0, angle, 0) * this.transform.rotation;
+        this.transform.Rotate(Vector3.forward, angle);
         heading += angle;
         rotation = this.transform.rotation.eulerAngles;
     }
 
     public void changePitch(float angle)
     {
-        this.transform.rotation = Quaternion.Euler(angle, 0, 0) * this.transform.rotation;
-        pitch += angle;
+        // this.transform.rotation = Quaternion.Euler(angle, 0, 0) * this.transform.rotation;
+        this.transform.Rotate(-Vector3.right, angle);
+        pitch -= angle;
         rotation = this.transform.rotation.eulerAngles;
     }
 
     public void changeRoll(float angle)
     {
-        this.transform.rotation = Quaternion.Euler(0, 0, angle) * this.transform.rotation;
+        this.transform.Rotate(Vector3.up, angle);
         roll += angle;
         rotation = this.transform.rotation.eulerAngles;
     }

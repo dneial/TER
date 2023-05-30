@@ -4,7 +4,7 @@ start : A
 angle : 22.5
 
 rules :
-A = F0.75 B [ h-22.5 F0.75 A ] [ h22.5 F0.75 A ] B 
+A = B [ h-22.5 F0.75 A ] [ h22.5 F0.75 A ] B 
 B = F0.75 B B 
 
 # lignes commentées avec '#'

@@ -1,0 +1,12 @@
+variables : A, B
+constants : +, -
+start : A
+angle : 25
+
+rules :
+A = AB
+B = +B
+
+#0 : A
+#1 : AB
+#2 : AB+B
