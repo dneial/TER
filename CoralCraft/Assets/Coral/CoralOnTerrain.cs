@@ -157,9 +157,9 @@ public class CoralOnTerrain : EditorWindow
                 GameObject parent = new GameObject();
                 
                 List<string> listpath = new List<string>();
-                listpath.Add("/Coral/L-System/Grammar/lophelia.lsys2");
-                listpath.Add("/Coral/L-System/Grammar/UASG.lsys2");
-                listpath.Add("/Coral/L-System/Grammar/custom.lsys");
+                listpath.Add("/Coral/L-System/Grammars/lophelia.lsys2");
+                listpath.Add("/Coral/L-System/Grammars/UASG.lsys2");
+                listpath.Add("/Coral/L-System/Grammars/custom.lsys");
                 
                 int grammar = (int)Random.Range(0, listpath.Count);
                 string path = listpath[grammar];
