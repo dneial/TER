@@ -16,6 +16,7 @@ public class Node {
     public bool isInfluenced { get; set; } = false;
     public GameObject gameObject { get; set; } = null;
     public int id { get; }
+    public bool linked { get; set; } = false;
 
     static int counter = 0;
 

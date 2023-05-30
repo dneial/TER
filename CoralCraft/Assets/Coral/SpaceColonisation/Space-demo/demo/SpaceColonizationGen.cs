@@ -65,15 +65,27 @@ public class SpaceColonizationGen : MonoBehaviour
 
         if(Input.GetKeyDown(KeyCode.RightArrow))
         {
-            Debug.Log("Generating...");
+            List<Node> nodes = new List<Node>();
             if(!generator.done) {
-                if(etape % 2 == 0)
-                    this.generator.Attract();
-                else
-                    this.generator.Grow2(new_leaves_per_step);
+                switch(etape)
+                {
+                    case 0:
+                        Debug.Log("Attracting");
+                        this.generator.Attract();
+                        etape++;
+                        break;
+                    case 1:
+                        Debug.Log("Growing");
+                        nodes = this.generator.Grow2(new_leaves_per_step);
+                        etape++;
+                        break;
+                    case 2:
+                        Debug.Log("Linking");
+                        this.generator.Link();
+                        etape = 0;
+                        break;
 
-
-                etape++;
+                }
             }
             else Debug.Log("Done @ " + generator.steps + " steps");
         }   

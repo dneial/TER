@@ -106,12 +106,17 @@ namespace demo {
             this.AttractNodes();
         }
 
-        public void Grow2(int new_leaves_per_iteration = 0){
+        public List<Node> Grow2(int new_leaves_per_iteration = 0){
             this.DropLeaves();
-            this.GrowNodes();
+            List<Node> new_nodes = this.GrowNodes();
             this.steps++;
             clear_colors();
             this.leaves.AddRange(this.PlaceLeaves(new_leaves_per_iteration));
+            return new_nodes;
+        }
+
+        public void Link(){
+            LinkNodes();
         }
 
 
@@ -161,11 +166,6 @@ namespace demo {
 
 
         private void clear_colors(){
-
-            foreach(Node node in this.nodes){
-                node.gameObject.GetComponent<Renderer>().material.color = Color.white;
-            }
-
             foreach(Leaf leaf in this.leaves){
                 leaf.gameObject.GetComponent<Renderer>().material.SetColor("_Color", Color.white);
             }
@@ -195,7 +195,6 @@ namespace demo {
                 }
                 
             }
-
             this.nodes.AddRange(newNodes);
             return newNodes;
 
@@ -245,7 +244,7 @@ namespace demo {
                 growThickness(root);
                 this.nodes.Add(root);
             }
-
+            LinkNodes();
             return root;
         }
 
@@ -297,14 +296,30 @@ namespace demo {
                 randomPoint.x = Random.Range(min.x, max.x);
                 randomPoint.y = Random.Range(min.y, max.y);
                 randomPoint.z = Random.Range(min.z, max.z);
-
-                points[i] = randomPoint;
+                //if(CheckSpacing(randomPoint, points, i)) 
+                    points[i] = randomPoint;
+                //else 
+                //    i--;
             }
-
 
             points = this.TestPoints(points);
 
             return points;
+        }
+
+        private bool CheckSpacing(Vector3 point, Vector3[] points, int nb_points)
+        {
+            float minDist = float.MaxValue;
+            float dist;
+            for (int i = 0; i < nb_points; i++)
+            {
+                dist = Vector3.Distance(point, points[i]);
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                }
+            }
+            return minDist >= 2;
         }
 
 
@@ -326,9 +341,6 @@ namespace demo {
                 {
                     newPoints.Add(p);
                 }
-                else {
-                    Debug.Log("Collision with: " + hits[0].collider.gameObject.name);
-                }
             }
 
             if(newPoints.Count > 0)
@@ -337,6 +349,23 @@ namespace demo {
                 return points;
         }
 
+        public void LinkNodes() 
+        {
+            List<Node> nodes = this.nodes.FindAll(node => node.parent != null && !node.linked);
+            Debug.Log("Linking " + nodes.Count + " nodes");
+            foreach(Node node in nodes){
+                Debug.Log("Node(" + node.id  + ")");
+                if(node.parent != null){
+                    GameObject capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+                    capsule.name = "Node(" + node.parent.id + ", " + node.id + ")";
+                    capsule.transform.position = (node.position + node.parent.position) / 2f;
+                    capsule.transform.parent = this.root.transform;
+                    capsule.transform.LookAt(node.position);
+                    capsule.transform.Rotate(Vector3.right, 90);
+                    node.linked = true;
+                }
+            }
+        }
 
         public List<Node> GetNodes() {
             return this.nodes;

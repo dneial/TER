@@ -12,9 +12,7 @@ public class CameraZoom : MonoBehaviour
 
     void Start()
     {
-        Debug.Log("camera pos : " + transform.position);
         transform.position = new Vector3(transform.position.x, transform.position.y + 10f, transform.position.z - 10f);
-        Debug.Log("camera pos : " + transform.position);
     }
 
     void Update()
