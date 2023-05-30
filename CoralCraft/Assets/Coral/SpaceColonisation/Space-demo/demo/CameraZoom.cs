@@ -12,7 +12,7 @@ public class CameraZoom : MonoBehaviour
 
     void Start()
     {
-        transform.position = new Vector3(transform.position.x, transform.position.y + 10f, transform.position.z - 10f);
+        transform.position = new Vector3(transform.position.x, transform.position.y + 7f, transform.position.z - 10f);
     }
 
     void Update()

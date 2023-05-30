@@ -28,7 +28,7 @@ public class SpaceColonizationGen : MonoBehaviour
     public void Start()
     {
 
-        GameObject go = Instantiate(prefab, new Vector3(0, 10f, 0), Quaternion.identity);
+        GameObject go = Instantiate(prefab, new Vector3(0, 5f, 0), Quaternion.identity);
 
 
         Bounds bounds = go.GetComponent<MeshCollider>().bounds;
@@ -37,7 +37,6 @@ public class SpaceColonizationGen : MonoBehaviour
         float scale = Mathf.Sqrt(influence_points) / 10f;
 
 
-        Debug.Log("scale for " + influence_points + "points : " + scale);
         go.transform.localScale = size * scale;
 
         bounds.size *= scale;

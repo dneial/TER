@@ -28,6 +28,9 @@ namespace demo {
                 if (distance <= kill_distance) {
                     this.reached = true;
                     closest = node;
+                    this.gameObject.GetComponent<MeshRenderer>().material.SetColor("_Color", Color.black);
+                    closest.gameObject.GetComponent<MeshRenderer>().material.SetColor("_Color", Color.black);
+
                     break;
                 }
                 else if (distance <= closestDistance && distance <= influence_radius) {

@@ -149,9 +149,10 @@ namespace demo {
             foreach(Node node in influenced){
                 int random = Random.Range(0, this.leaves.Count);
                 Color color = GenerateColor(random, this.leaves.Count);
-                node.gameObject.GetComponent<Renderer>().material.SetColor("_Color", color);
+                Color beforeColor = node.gameObject.GetComponent<Renderer>().material.GetColor("_Color");
+                if(beforeColor != Color.black) node.gameObject.GetComponent<Renderer>().material.SetColor("_Color", color);
                 foreach(Leaf leaf in node.influences){
-                    leaf.gameObject.GetComponent<Renderer>().material.SetColor("_Color", color);
+                    if(!leaf.reached) leaf.gameObject.GetComponent<Renderer>().material.SetColor("_Color", color);
                 }
             }
         }
@@ -183,7 +184,7 @@ namespace demo {
             {
                 node = this.nodes[i];
                 if(node.isInfluenced) {
-                    node.direction /= node.influences.Count;
+                    node.direction /= node.influences.Count + 1;
                     node.direction.Normalize();
                     node.influences = new List<Leaf>();
                     node.isInfluenced = false;
@@ -246,7 +247,6 @@ namespace demo {
                 growThickness(root);
                 this.nodes.Add(root);
             }
-            LinkNodes();
             return root;
         }
 
@@ -298,10 +298,7 @@ namespace demo {
                 randomPoint.x = Random.Range(min.x, max.x);
                 randomPoint.y = Random.Range(min.y, max.y);
                 randomPoint.z = Random.Range(min.z, max.z);
-                //if(CheckSpacing(randomPoint, points, i)) 
-                    points[i] = randomPoint;
-                //else 
-                //    i--;
+                points[i] = randomPoint;
             }
 
             points = this.TestPoints(points);
