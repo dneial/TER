@@ -42,7 +42,7 @@ public class CoralOnTerrain : EditorWindow
         probaHeight = EditorGUILayout.CurveField("Apparition", probaHeight);
 
         GUILayout.Label("Nombre de generation");
-        nbCoraux = EditorGUILayout.IntSlider(nbCoraux, 1, 1000);
+        nbCoraux = EditorGUILayout.IntSlider(nbCoraux, 1, 200);
 
         leaf_influence_radius = Random.Range(10, 70);
 
@@ -59,11 +59,26 @@ public class CoralOnTerrain : EditorWindow
         thickness.AddKey(0.95f, 1);
         thickness.SmoothTangents(3, -1);
 
-        if(GUILayout.Button("RandomGeneration")) {
+        if(GUILayout.Button("Generation Aléatoire")) {
             RandomGeneration();
         }
-        if(GUILayout.Button("ProbaGeneration")) {
+        if(GUILayout.Button("Generation en hauteur")) {
             ProbaGeneration();
+        }
+        EditorGUILayout.Space();
+        
+        if(GUILayout.Button("reset"))
+        {
+            //destroy every object in the scene except the camera, light and terrain
+            GameObject[] allObjects = FindObjectsOfType<GameObject>();
+            foreach (GameObject go in allObjects)
+            {
+                if (go.name != "Main Camera" && go.name != "Directional Light" && go.name != "Terrain")
+                {
+                    DestroyImmediate(go);
+                }
+            }
+            
         }
     }
 
@@ -79,7 +94,7 @@ public class CoralOnTerrain : EditorWindow
             float x = Random.Range(posTerrain.x, posTerrain.x+td.size.x);
             float z = Random.Range(posTerrain.z, posTerrain.z+td.size.z);
             float y = Terrain.activeTerrain.SampleHeight(new Vector3(x,0,z)) + Terrain.activeTerrain.transform.position.y;
-            if(Random.Range(0f, 1f) < probaHeight.Evaluate(y)) {
+            if(Random.Range(0f, 1f) > probaHeight.Evaluate(y)) {
                 GameObject coral = CreateCoral();
                 if (coral == null)
                 {

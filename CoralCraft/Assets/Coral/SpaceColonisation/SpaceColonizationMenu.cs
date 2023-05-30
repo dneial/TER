@@ -156,8 +156,7 @@ public class SpaceColonizationMenu : EditorWindow
                 }
                 Debug.Log(this.vol);
             }
-        }
-        
+        }    
 
         float newHeight = EditorGUILayout.Slider("Hauteur du volume", height, 0.1f, 20f);
 
@@ -241,31 +240,26 @@ public class SpaceColonizationMenu : EditorWindow
             {
                 MeshCombiner combiner = new MeshCombiner(this.view.GetRoot());
                 combiner.combineMeshes();
+            }        
+        }
+
+        EditorGUILayout.Space();
+        
+        if(GUILayout.Button("reset"))
+        {
+            //destroy every object in the scene except the camera and the light
+            foreach (GameObject obj in FindObjectsOfType(typeof(GameObject)))
+            {
+                if (obj.name != "Directional Light" && obj.name != "Main Camera")
+                {
+                    DestroyImmediate(obj);
+                }
             }
             
         }
 
-        // if(GUILayout.Button("Save configuration")){
-        //     SavePopup popup = ScriptableObject.CreateInstance<SavePopup>();
-        //     if(prefab == null){
-        //         prefab = AssetDatabase.LoadAssetAtPath("Assets/Coral/SpaceColonisation/Blender_msh/AsimBox.fbx", typeof(GameObject)) as GameObject;
-        //     }
-        //     if(configName == ""){
-        //         popup.setMsg("Nom de configuration vide !\nEchec de l'enregistrement");
-        //     } else if (saveConfig(new ConfigSpaceColo(configName, leaf_influence_radius, leaf_kill_distance,
-        //     influence_points, thickness, prefab.name, height, max_iterations, new_leaves))){
-        //         popup.setMsg("Enregistrement réussi");
-        //     } else {
-        //         popup.setMsg("Ce nom est déja pris !\nEchec de l'enregistrement");
-        //     }
-        //     popup.minSize = new Vector2(200, 90);
-        //     popup.maxSize = new Vector2(200, 90);
-        //     popup.Show();
-        // }
-
         EditorGUILayout.EndScrollView();
         EditorGUILayout.EndVertical();
-
     }
 
     private bool saveConfig(ConfigSpaceColo config){

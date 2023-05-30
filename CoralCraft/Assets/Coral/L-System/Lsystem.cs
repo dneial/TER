@@ -103,7 +103,7 @@ public class Lsystem {
         string l = length.ToString();
         string a = angle.ToString();
         
-        string tmp = "F0 R" + t + " ";
+        string tmp = "R" + t + " ";
         int cpt = 0;
 
         for(int i = 0; i < current.Length; i++)

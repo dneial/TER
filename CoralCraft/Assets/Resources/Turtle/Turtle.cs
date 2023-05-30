@@ -126,15 +126,15 @@ public class Turtle : MonoBehaviour
 
     public void push()
     {
-        Debug.Log("actual state = " + state);
+        // Debug.Log("actual state = " + state);
         stack.Push(new TurtleState(state));
-        Debug.Log("new top = " + stack.Peek());
+        // Debug.Log("new top = " + stack.Peek());
     }
 
     public void pop()
     {
-        Debug.Log("actual state = " + state);
-        Debug.Log("stack.Peek() = " + stack.Peek());
+        // Debug.Log("actual state = " + state);
+        // Debug.Log("stack.Peek() = " + stack.Peek());
 
         TurtleState temp = new TurtleState(stack.Pop());
 
@@ -150,7 +150,7 @@ public class Turtle : MonoBehaviour
         this.position = temp.position;
         this.rotation = temp.rotation;
 
-        Debug.Log("new state = " + state);
+        // Debug.Log("new state = " + state);
     }
     
 
@@ -298,7 +298,7 @@ public class Turtle : MonoBehaviour
     //run methods
 
     private void Start() {
-        Debug.Log("production : "+production);
+        //Debug.Log("production : "+production);
         
         state = new TurtleState();
         this.push();
@@ -309,7 +309,7 @@ public class Turtle : MonoBehaviour
         this.transform.position = racine.transform.position = position;
         this.transform.rotation = racine.transform.rotation = Quaternion.Euler(rotation);
         
-        Camera.main.transform.position = this.transform.position + new Vector3(0, 20, 5);
+        //Camera.main.transform.position = this.transform.position + new Vector3(0, 20, 5);
     }
 
     private void Update() {       
@@ -321,8 +321,8 @@ public class Turtle : MonoBehaviour
             if (wordPointer < production.Length)
             {
                 string word = getNextWord();
-                Debug.Log("word : " + word);
-                Debug.Log("wordPointer : " + wordPointer);
+                Debug.Log("Tortue interprète : " + word);
+                //Debug.Log("wordPointer : " + wordPointer);
                 interpret(word);
             }
         }

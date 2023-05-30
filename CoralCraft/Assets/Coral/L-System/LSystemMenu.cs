@@ -164,7 +164,7 @@ public class LSystemMenu : EditorWindow
             length = EditorGUILayout.Slider("Longueur", length, 0, 1);
 
             //GUILayout.Label("angle");
-            angle = EditorGUILayout.Slider("Angle", angle, 0, 360);
+            angle = EditorGUILayout.Slider("Angle", angle, 0, 45);
 
             EditorGUI.indentLevel--;
         }
@@ -285,16 +285,32 @@ public class LSystemMenu : EditorWindow
             }
             else grammarBool.target = true;
 
-            //on a la chaine de caractères
-            
-            //load fbx
-
             GameObject turtleprefab = AssetDatabase.LoadAssetAtPath("Assets/Resources/Turtle/turtle.fbx", typeof(GameObject)) as GameObject;
-            Debug.Log(turtleprefab);
             GameObject turtle = Instantiate(turtleprefab, new Vector3(0, 0, 0), Quaternion.identity);
             //add script to turtle
             turtle.gameObject.AddComponent<Turtle>();
             turtle.GetComponent<Turtle>().production = lsystem.current;
+
+            //Set main camera position to 0, 10, 25
+            //and diirection to 0, 180, 0
+            Camera.main.transform.position = new Vector3(0, 5, 15);
+            Camera.main.transform.rotation = Quaternion.Euler(0, 180, 0);
+    
+            // SceneView.lastActiveSceneView.Repaint();
+
+
+        }
+        if(GUILayout.Button("reset"))
+        {
+            //destroy every object in the scene except the camera and the light
+            foreach (GameObject obj in FindObjectsOfType(typeof(GameObject)))
+            {
+                if (obj.name != "Directional Light" && obj.name != "Main Camera")
+                {
+                    DestroyImmediate(obj);
+                }
+            }
+            
         }
 
         EditorGUILayout.EndScrollView();
@@ -320,7 +336,7 @@ public class LSystemMenu : EditorWindow
 
     private void chargeConfig(ConfigLSys config, string[] files){
         configName = config.name;
-        // thickness = config.thickness;
+        thickness = config.thickness;
         length = config.length;
         nbIteration = config.nbIteration;
         angle = config.angle;
