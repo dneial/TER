@@ -6,9 +6,8 @@ using UnityEditor;
 
 public class Turtle : MonoBehaviour
 {
-    public GameObject turtle3D;
     private TurtleState state;
-    //contains the turtle's state : position, direction, radius, step, heading, pitch, roll
+    //contains the turtle's state : position, rotation, radius, step, heading, pitch, roll
 
     private Stack<TurtleState> stack = new Stack<TurtleState>();
 
@@ -27,10 +26,10 @@ public class Turtle : MonoBehaviour
         set { state.position = value; }
     }
 
-    public Vector3 direction
+    public Vector3 rotation
     {
-        get { return state.direction; }
-        set { state.direction = value; }
+        get { return state.rotation; }
+        set { state.rotation = value; }
     }
 
     public float heading
@@ -54,7 +53,7 @@ public class Turtle : MonoBehaviour
     public float radius
     {
         get { return state.radius; }
-        set { state.radius = value; }
+        set { state.radius = value;}
     }
 
     public float step
@@ -74,17 +73,27 @@ public class Turtle : MonoBehaviour
     //turtle methods
     public void move(float distance)
     {
-        //place a cylinder between the previous position and the new one
+
+        GameObject segment = new GameObject();
         
         GameObject cylinder = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-        cylinder.transform.position = position;
-        cylinder.transform.rotation = turtle3D.transform.rotation;
-        cylinder.transform.localScale = new Vector3(radius, distance/2, radius);
-        cylinder.transform.Translate(0, 0, distance/2);
-        cylinder.transform.parent = racine.transform;
-        
-        turtle3D.transform.Translate(0, 0, distance);
-        position += distance * direction;
+        cylinder.transform.rotation = Quaternion.Euler(90, 0, 0);
+        cylinder.transform.localScale = new Vector3(radius, distance / 2, radius);
+        cylinder.transform.parent = segment.transform;
+
+        //place the new segment between the previous position and the new one
+        segment.transform.position = (this.transform.position + transform.forward * distance / 2);
+        segment.transform.parent = racine.transform;
+        segment.transform.rotation = this.transform.rotation;
+
+        this.transform.position += transform.forward * distance;
+        position += transform.forward * distance;
+
+        //place a sphere at the end of the segment
+        GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        sphere.transform.position = this.transform.position;
+        sphere.transform.localScale = new Vector3(radius, radius, radius);
+        sphere.transform.parent = racine.transform;
 
     }
 
@@ -95,32 +104,52 @@ public class Turtle : MonoBehaviour
 
     public void changeHead(float angle)
     {
-        turtle3D.transform.rotation = Quaternion.Euler(0, angle, 0);
+        this.transform.rotation = Quaternion.Euler(0, angle, 0) * this.transform.rotation;
         heading += angle;
+        rotation = this.transform.rotation.eulerAngles;
     }
 
     public void changePitch(float angle)
     {
-        turtle3D.transform.rotation = Quaternion.Euler(angle, 0, 0);
+        this.transform.rotation = Quaternion.Euler(angle, 0, 0) * this.transform.rotation;
         pitch += angle;
+        rotation = this.transform.rotation.eulerAngles;
     }
 
     public void changeRoll(float angle)
     {
-        turtle3D.transform.rotation = Quaternion.Euler(0, 0, angle);
-        roll -= angle;
+        this.transform.rotation = Quaternion.Euler(0, 0, angle) * this.transform.rotation;
+        roll += angle;
+        rotation = this.transform.rotation.eulerAngles;
     }
 
     public void push()
     {
+        Debug.Log("actual state = " + state);
         stack.Push(new TurtleState(state));
+        Debug.Log("new top = " + stack.Peek());
     }
 
     public void pop()
     {
-        state = stack.Pop();
-        turtle3D.transform.position = state.position;
-        turtle3D.transform.rotation = Quaternion.Euler(state.heading, state.pitch, state.roll);
+        Debug.Log("actual state = " + state);
+        Debug.Log("stack.Peek() = " + stack.Peek());
+
+        TurtleState temp = new TurtleState(stack.Pop());
+
+        this.transform.position = temp.position;
+        this.transform.rotation = Quaternion.Euler(temp.rotation);
+        
+        this.heading = temp.heading;
+        this.pitch = temp.pitch;
+        this.roll = temp.roll;
+        this.radius = temp.radius;
+        this.step = temp.step;
+
+        this.position = temp.position;
+        this.rotation = temp.rotation;
+
+        Debug.Log("new state = " + state);
     }
     
 
@@ -128,10 +157,10 @@ public class Turtle : MonoBehaviour
     public string getNextWord()
     {
         string word = "";
-        Debug.Log("inside getNextWord");
-        Debug.Log("wordPointer = " + wordPointer);
-        Debug.Log("production.Length = " + production.Length);
-        Debug.Log("production[wordPointer] = " + production[wordPointer]);
+        // Debug.Log("inside getNextWord");
+        // Debug.Log("wordPointer = " + wordPointer);
+        // Debug.Log("production.Length = " + production.Length);
+        // Debug.Log("production[wordPointer] = " + production[wordPointer]);
         while (wordPointer < production.Length && production[wordPointer] != ' ')
         {
             word += production[wordPointer];
@@ -263,12 +292,6 @@ public class Turtle : MonoBehaviour
     public void interpretVariable(char c, string param)
     {
         Debug.Log("untransformed variable : " + c + " with param : " + param + "");
-        // string rule = lsystem.rules[c];
-        // string[] words = rule.Split(' ');
-        // foreach (string word in words)
-        // {
-        //     interpret(word);
-        // }
     }
 
     //run methods
@@ -277,20 +300,22 @@ public class Turtle : MonoBehaviour
         Debug.Log("production : "+production);
         
         state = new TurtleState();
-        racine = new GameObject("racine");
-
-        turtle3D = this.gameObject;
-        turtle3D.transform.position = racine.transform.position = position;
-        turtle3D.transform.rotation = racine.transform.rotation = Quaternion.Euler(direction);
+        this.push();
         
+        racine = new GameObject("racine");
         wordPointer = 0;
+
+        this.transform.position = racine.transform.position = position;
+        this.transform.rotation = racine.transform.rotation = Quaternion.Euler(rotation);
+        
+        Camera.main.transform.position = this.transform.position + new Vector3(0, 20, 5);
     }
 
     private void Update() {       
         if(Input.GetKeyDown(KeyCode.Space))
         {
             //camera follow the turtle 
-            Camera.main.transform.position = turtle3D.transform.position + new Vector3(0, 0, -15);
+            //Camera.main.transform.position = this.transform.position + new Vector3(0, 0, -15);
            
             if (wordPointer < production.Length)
             {
@@ -322,27 +347,27 @@ public class Turtle : MonoBehaviour
         }
         if(Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            changeHead(-10);
+            changeHead(-30);
         }
         if(Input.GetKeyDown(KeyCode.RightArrow))
         {
-            changeHead(10);
+            changeHead(30);
         }
         if(Input.GetKeyDown(KeyCode.Q))
         {
-            changeRoll(10);
+            changeRoll(30);
         }
         if(Input.GetKeyDown(KeyCode.D))
         {
-            changeRoll(-10);
+            changeRoll(-30);
         }
         if(Input.GetKeyDown(KeyCode.Z))
         {
-            changePitch(10);
+            changePitch(30);
         }
         if(Input.GetKeyDown(KeyCode.S))
         {
-            changePitch(-10);
+            changePitch(-30);
         }
 
     }

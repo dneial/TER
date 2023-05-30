@@ -10,7 +10,7 @@ public class TurtleState
     public float step { get; set; }
 
     public Vector3 position { get; set; } 
-    public Vector3 direction { get; set; }
+    public Vector3 rotation { get; set; }
 
     public TurtleState()
     {
@@ -21,7 +21,7 @@ public class TurtleState
         this.step = 0;
 
         this.position = new Vector3(0, 0, 0);
-        this.direction = new Vector3(0, 0, 0);
+        this.rotation = new Vector3(0, 0, 0);
     }
 
     public TurtleState(float heading, float pitch, float roll, float radius, float step, Vector3 position, Vector3 direction)
@@ -33,7 +33,7 @@ public class TurtleState
         this.step = step;
 
         this.position = position;
-        this.direction = direction;
+        this.rotation = direction;
     }
 
     public TurtleState(TurtleState turtleState)
@@ -45,8 +45,16 @@ public class TurtleState
         this.step = turtleState.step;
 
         this.position = turtleState.position;
-        this.direction = turtleState.direction;
+        this.rotation = turtleState.rotation;
     }
 
+
+    public override string ToString()
+    {
+        return " p : " + pitch + "h : " + heading + " r : " + roll +
+         "\nR : " + radius + " step : " + step + 
+         "\npos : " + position + 
+         "\nrot : " + rotation;
+    }
 
 }
